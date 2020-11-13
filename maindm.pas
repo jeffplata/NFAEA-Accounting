@@ -35,6 +35,7 @@ procedure TdmMain.DataModuleCreate(Sender: TObject);
 begin
   writeln('Project Options.../ Compiler Options/ Config and Target/ Win32...');
   writeln('Debug / Development only; disable in Production.');
+  writeln;
   AppConnection.Connect();
 end;
 

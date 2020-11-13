@@ -10,6 +10,7 @@ uses
 
 function IsDirectoryWriteable(const AName: string): Boolean;
 function AppDataDirectory: string;
+function AppConfigFilename: string;
 
 implementation
 
@@ -50,6 +51,11 @@ begin
       // TODO: if it still fails, ask help from user
     end;
   end;
+end;
+
+function AppConfigFilename: string;
+begin
+  Result := ExtractFileNameOnly(Application.ExeName)+'.cfg';
 end;
 
 end.

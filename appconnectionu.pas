@@ -49,6 +49,7 @@ begin
   dataDir := AppDataDirectory;
   // TODO: check for empty AppDataDirectory
 
+  writeln(dataDir+ AppConfigFilename);
   Result := True;
 end;
 
