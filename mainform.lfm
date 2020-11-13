@@ -1,0 +1,45 @@
+object fmMain: TfmMain
+  Left = 246
+  Height = 378
+  Top = 169
+  Width = 783
+  Caption = 'Accounting'
+  Menu = MainMenu1
+  LCLVersion = '2.0.10.0'
+  object MainMenu1: TMainMenu
+    Left = 24
+    Top = 8
+    object MenuItem3: TMenuItem
+      Caption = '&File'
+      object Setdatabase1: TMenuItem
+        Action = actSetdatabase
+      end
+      object MenuItem11: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem12: TMenuItem
+        Action = actExit
+      end
+    end
+    object MenuItem1: TMenuItem
+      Caption = 'Help'
+      object MenuItem2: TMenuItem
+        Action = actAbout
+      end
+    end
+  end
+  object ActionList1: TActionList
+    Left = 24
+    Top = 64
+    object actExit: TAction
+      Caption = 'E&xit'
+      OnExecute = actExitExecute
+    end
+    object actAbout: TAction
+      Caption = '&About'
+    end
+    object actSetdatabase: TAction
+      Caption = 'Set &database...'
+    end
+  end
+end
