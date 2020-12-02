@@ -29,7 +29,7 @@ var
 implementation
 
 uses
-  Dialogs, myUtils;
+  Dialogs, myUtils, IniFiles, md5;
 
 
 { TAppConnection }
@@ -44,13 +44,55 @@ end;
 function TAppConnection.Connect(const servername: string; databasename: string
   ): Boolean;
 var
-  dataDir : string;
+  dataDir, secretDir : string;
+  configfile : string;
+  ini: TIniFile;
+  svr, db, usr, pwd: string;
+  saveIni: Boolean;
+
 begin
+  Result := True;
+
+  //pwd := 'masterkey';
+  //pwd := MD5Print(MD5String(pwd));
+  //writeln(pwd);
   dataDir := AppDataDirectory;
   // TODO: check for empty AppDataDirectory
+  secretDir := GetAppConfigDir(false);
 
-  writeln(dataDir+ AppConfigFilename);
-  Result := True;
+  configfile:= dataDir + AppConfigFilename;
+  ini := TIniFile.Create(configfile);
+  with ini do
+  try
+    saveIni:= not SectionExists('DB');
+    svr:= ReadString('DB', 'server', 'localhost');
+    db := ReadString('DB', 'database', '');
+    usr:= ReadString('DB', 'username', 'sysdba');
+    pwd:= ReadString('DB', 'pass', 'masterkey');
+    if db = '' then
+      db := 'c:\projects\NFAEA accounting\accounting.fdb';
+    FConnection.HostName:= svr;
+    FConnection.DatabaseName:= db;
+    FConnection.UserName:= usr;
+    FConnection.Password:= pwd;
+    try
+      FConnection.Connected:= True;
+    except
+      raise;
+      Result := False;
+    end;
+  finally
+    if saveIni then begin
+      usr:= MD5Print(MD5String(usr));
+      pwd:= MD5Print(MD5String(pwd));
+      WriteString('DB', 'server', svr);
+      WriteString('DB', 'database', db);
+      WriteString('DB', 'username', usr);
+      WriteString('DB', 'pass', pwd);
+    end;
+    Free;
+  end;
+
 end;
 
 initialization
