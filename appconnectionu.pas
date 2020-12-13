@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, SQLDB, IBConnection;
 
 type
-
+  TConnectCallback = function(s, d, u, p: string): Boolean of object;
   { TAppConnection }
 
   TAppConnection = class(TObject)
@@ -21,6 +21,8 @@ type
     property Connection: TIBConnection read FConnection write FConnection;
     constructor Create(AOwner: TComponent);
     function Connect(const servername: string = ''; databasename: string = ''): Boolean;
+    function ConnectDialog(const servername: string = ''; databasename: string = ''): Boolean;
+    function connect_(s, d, u, p: string): Boolean;
   end;
     
 var
@@ -29,7 +31,7 @@ var
 implementation
 
 uses
-  Dialogs, myUtils, IniFiles, md5;
+  Dialogs, Forms, Controls, myUtils, changedatabaseform, IniFiles, md5;
 
 
 { TAppConnection }
@@ -44,23 +46,58 @@ end;
 function TAppConnection.Connect(const servername: string; databasename: string
   ): Boolean;
 var
-  dataDir, secretDir : string;
+  dataDir : string;
   configfile : string;
   ini: TIniFile;
   svr, db, usr, pwd: string;
   saveIni: Boolean;
 
 begin
-  Result := True;
+  Result := False;
 
   //pwd := 'masterkey';
   //pwd := MD5Print(MD5String(pwd));
-  //writeln(pwd);
   dataDir := AppDataDirectory;
   // TODO: check for empty AppDataDirectory
-  secretDir := GetAppConfigDir(false);
 
-  configfile:= dataDir + AppConfigFilename;
+  configfile:= ChangeFileExt(dataDir + AppConfigFilename, '.fcr');
+
+  //if not FileExists(configfile) then
+  if true then
+  begin
+    //show change database form
+    ConnectDialog();
+    //Application.CreateForm(TfrmChangeDatabase, frmChangeDatabase);
+    //with frmChangeDatabase do
+    //try
+    //  if ShowModal = mrOk then
+    //    begin
+    //      svr := edtServer.text;
+    //      db  := edtDatabase.Text;
+    //      usr := edtUser.Text;
+    //      pwd := edtPass.Text;
+    //      FConnection.HostName:= svr;
+    //      FConnection.DatabaseName:= db;
+    //      FConnection.UserName:= usr;
+    //      FConnection.Password:= pwd;
+    //      try
+    //        FConnection.Connected:= True;
+    //        Result := True;
+    //      except
+    //        Result := False;
+    //        raise;
+    //      end;
+    //    end;
+    //finally
+    //  free;
+    //end;
+  end
+  else
+  begin
+
+  end;
+
+
   ini := TIniFile.Create(configfile);
   with ini do
   try
@@ -75,8 +112,9 @@ begin
     FConnection.DatabaseName:= db;
     FConnection.UserName:= usr;
     FConnection.Password:= pwd;
+    //writeln(usr + ':' +pwd);
     try
-      FConnection.Connected:= True;
+      //FConnection.Connected:= True;
     except
       raise;
       Result := False;
@@ -93,6 +131,51 @@ begin
     Free;
   end;
 
+end;
+
+function TAppConnection.ConnectDialog(const servername: string;
+  databasename: string): Boolean;
+begin
+  //show change database form
+  Result := False;
+  Application.CreateForm(TfrmChangeDatabase, frmChangeDatabase);
+  with frmChangeDatabase do
+  try
+    ConnectCallback:= @connect_;
+    edtServer.Text := servername;
+    edtDatabase.Text := databasename;
+    if ShowModal = mrOk then
+      begin
+        FConnection.HostName := edtServer.text;
+        FConnection.DatabaseName  := edtDatabase.Text;
+        FConnection.UserName := edtUser.Text;
+        FConnection.Password := edtPass.Text;
+        try
+          FConnection.Connected:= True;
+          Result := True;
+        except
+          Result := False;
+          raise;
+        end;
+      end;
+  finally
+    free;
+  end;
+end;
+
+function TAppConnection.connect_(s, d, u, p: string): Boolean;
+begin
+  FConnection.HostName:= s;
+  FConnection.DatabaseName:= d;
+  FConnection.UserName:= u;
+  FConnection.Password:= p;
+  try
+    FConnection.Connected:= True;
+    Result := True;
+  except
+    Result := False;
+    raise;
+  end;
 end;
 
 initialization

@@ -1,0 +1,149 @@
+object frmChangeDatabase: TfrmChangeDatabase
+  Left = 407
+  Height = 299
+  Top = 207
+  Width = 443
+  Caption = 'Change database'
+  ClientHeight = 299
+  ClientWidth = 443
+  OnCreate = FormCreate
+  Position = poOwnerFormCenter
+  LCLVersion = '2.0.10.0'
+  object edtServer: TLabeledEdit
+    Left = 24
+    Height = 23
+    Top = 48
+    Width = 395
+    Anchors = [akTop, akLeft, akRight]
+    EditLabel.Height = 15
+    EditLabel.Width = 395
+    EditLabel.Caption = '&Server:'
+    EditLabel.ParentColor = False
+    TabOrder = 0
+  end
+  object edtDatabase: TLabeledEdit
+    Left = 24
+    Height = 23
+    Top = 96
+    Width = 336
+    Anchors = [akTop, akLeft, akRight]
+    EditLabel.Height = 15
+    EditLabel.Width = 336
+    EditLabel.Caption = '&Database:'
+    EditLabel.ParentColor = False
+    TabOrder = 1
+  end
+  object edtUser: TLabeledEdit
+    Left = 24
+    Height = 23
+    Top = 144
+    Width = 395
+    Anchors = [akTop, akLeft, akRight]
+    EditLabel.Height = 15
+    EditLabel.Width = 395
+    EditLabel.Caption = '&Username:'
+    EditLabel.ParentColor = False
+    TabOrder = 2
+  end
+  object edtPass: TLabeledEdit
+    Left = 24
+    Height = 23
+    Top = 192
+    Width = 395
+    Anchors = [akTop, akLeft, akRight]
+    EchoMode = emPassword
+    EditLabel.Height = 15
+    EditLabel.Width = 395
+    EditLabel.Caption = '&Password:'
+    EditLabel.ParentColor = False
+    PasswordChar = '*'
+    TabOrder = 3
+  end
+  object btnOk: TButton
+    Left = 264
+    Height = 25
+    Top = 259
+    Width = 75
+    Action = actOk
+    Anchors = [akRight, akBottom]
+    Default = True
+    OnClick = actOkExecute
+    TabOrder = 4
+  end
+  object btnCancel: TButton
+    Left = 344
+    Height = 25
+    Top = 259
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 5
+  end
+  object SpeedButton1: TSpeedButton
+    Left = 363
+    Height = 22
+    Top = 96
+    Width = 56
+    Action = actBrowse
+  end
+  object Panel1: TPanel
+    Left = 24
+    Height = 34
+    Top = 259
+    Width = 232
+    BevelOuter = bvNone
+    ClientHeight = 34
+    ClientWidth = 232
+    TabOrder = 6
+    Visible = False
+    object GIFViewer1: TGIFViewer
+      Left = 0
+      Height = 16
+      Top = 0
+      Width = 16
+      Color = clNone
+      Border = False
+      BorderColor = clBlack
+      BorderWidth = 1
+      BevelColor = clBlack
+      BevelOuter = bvNone
+      AutoPlay = True
+      Transparent = True
+      Center = False
+      AutoStretchMode = smManual
+      Stretch = False
+      FileName = 'C:\projects\NFAEA Accounting\busy-16x16.gif'
+      DisplayInvalidFrames = False
+      AutoRemoveInvalidFrame = True
+    end
+    object Label1: TLabel
+      Left = 24
+      Height = 15
+      Top = 0
+      Width = 72
+      Caption = 'Connecting...'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+  end
+  object ActionList1: TActionList
+    Left = 112
+    object actOk: TAction
+      Caption = 'Ok'
+      OnExecute = actOkExecute
+      OnUpdate = actOkUpdate
+    end
+    object actBrowse: TAction
+      Caption = '&Browse...'
+      OnExecute = actBrowseExecute
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    Title = 'Open existing database'
+    Filter = '*.fdb'
+    Left = 144
+  end
+end

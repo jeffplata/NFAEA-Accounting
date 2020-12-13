@@ -7,7 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, mainForm, appConnectionU, mainDM, myUtils;
+  Forms, mainForm, appConnectionU, mainDM, myUtils, changedatabaseform,
+  pascalscript;
 
 {$R *.res}
 
