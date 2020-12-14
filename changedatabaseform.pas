@@ -10,7 +10,7 @@ uses
 
 type
 
-  TConnectCallback = function(s, d, u, p: string): Boolean of object;
+  TConnectCallback = function(s, d, u, p: string; var msg:String): Boolean of object;
 
   { TfrmChangeDatabase }
 
@@ -24,8 +24,7 @@ type
     edtDatabase: TLabeledEdit;
     edtUser: TLabeledEdit;
     edtPass: TLabeledEdit;
-    GIFViewer1: TGIFViewer;
-    Label1: TLabel;
+    lblStatus: TLabel;
     OpenDialog1: TOpenDialog;
     Panel1: TPanel;
     SpeedButton1: TSpeedButton;
@@ -61,25 +60,30 @@ end;
 procedure TfrmChangeDatabase.FormCreate(Sender: TObject);
 begin
   OpenDialog1.InitialDir:= AppDataDirectory;
+  lblStatus.Caption := '';
 end;
 
 procedure TfrmChangeDatabase.actOkExecute(Sender: TObject);
 var
-  s, d, u, p: string;
+  s, d, u, p, msg: string;
+  connected_ : Boolean;
 begin
   s := edtServer.Text;
   d := edtDatabase.Text;
   u := edtUser.Text;
   p := edtPass.Text;
-  try          
-    panel1.Visible:= true;
-    Update;
-    if ConnectCallback(s,d, u, p) then
-      ModalResult:= mrOk;
-  finally
-    panel1.Visible:= false;
-    Update;
-  end;
+
+  btnOk.Enabled:= false;
+  connected_ := ConnectCallback(s,d, u, p, msg);   
+  if connected_ then
+    ModalResult:= mrOk
+  else
+    begin
+      MessageDlg('Info', msg, mtConfirmation, [mbOk], 0);
+      edtUser.SetFocus;
+    end;
+  btnOk.Enabled := true;
+
 end;
 
 procedure TfrmChangeDatabase.actBrowseExecute(Sender: TObject);

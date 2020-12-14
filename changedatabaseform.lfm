@@ -97,32 +97,12 @@ object frmChangeDatabase: TfrmChangeDatabase
     ClientHeight = 34
     ClientWidth = 232
     TabOrder = 6
-    Visible = False
-    object GIFViewer1: TGIFViewer
+    object lblStatus: TLabel
       Left = 0
-      Height = 16
-      Top = 0
-      Width = 16
-      Color = clNone
-      Border = False
-      BorderColor = clBlack
-      BorderWidth = 1
-      BevelColor = clBlack
-      BevelOuter = bvNone
-      AutoPlay = True
-      Transparent = True
-      Center = False
-      AutoStretchMode = smManual
-      Stretch = False
-      FileName = 'C:\projects\NFAEA Accounting\busy-16x16.gif'
-      DisplayInvalidFrames = False
-      AutoRemoveInvalidFrame = True
-    end
-    object Label1: TLabel
-      Left = 24
       Height = 15
       Top = 0
-      Width = 72
+      Width = 232
+      Align = alTop
       Caption = 'Connecting...'
       Font.Style = [fsBold]
       ParentColor = False

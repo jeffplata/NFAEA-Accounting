@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, SQLDB, IBConnection;
 
 type
-  TConnectCallback = function(s, d, u, p: string): Boolean of object;
+  TConnectCallback = function(s, d, u, p: string; var msg: string): Boolean of object;
   { TAppConnection }
 
   TAppConnection = class(TObject)
@@ -22,7 +22,7 @@ type
     constructor Create(AOwner: TComponent);
     function Connect(const servername: string = ''; databasename: string = ''): Boolean;
     function ConnectDialog(const servername: string = ''; databasename: string = ''): Boolean;
-    function connect_(s, d, u, p: string): Boolean;
+    function connect_(s, d, u, p: string; var msg: string): Boolean;
   end;
     
 var
@@ -67,30 +67,6 @@ begin
   begin
     //show change database form
     ConnectDialog();
-    //Application.CreateForm(TfrmChangeDatabase, frmChangeDatabase);
-    //with frmChangeDatabase do
-    //try
-    //  if ShowModal = mrOk then
-    //    begin
-    //      svr := edtServer.text;
-    //      db  := edtDatabase.Text;
-    //      usr := edtUser.Text;
-    //      pwd := edtPass.Text;
-    //      FConnection.HostName:= svr;
-    //      FConnection.DatabaseName:= db;
-    //      FConnection.UserName:= usr;
-    //      FConnection.Password:= pwd;
-    //      try
-    //        FConnection.Connected:= True;
-    //        Result := True;
-    //      except
-    //        Result := False;
-    //        raise;
-    //      end;
-    //    end;
-    //finally
-    //  free;
-    //end;
   end
   else
   begin
@@ -163,8 +139,9 @@ begin
   end;
 end;
 
-function TAppConnection.connect_(s, d, u, p: string): Boolean;
-begin
+function TAppConnection.connect_(s, d, u, p: string; var msg:string): Boolean;
+begin   
+  Result := False;
   FConnection.HostName:= s;
   FConnection.DatabaseName:= d;
   FConnection.UserName:= u;
@@ -173,8 +150,13 @@ begin
     FConnection.Connected:= True;
     Result := True;
   except
-    Result := False;
-    raise;
+      on e: Exception do
+      begin
+        if Pos('password', e.Message) > 0 then
+          msg := 'Username or password is not valid.'
+        else
+          msg := e.Message;  
+      end;
   end;
 end;
 
