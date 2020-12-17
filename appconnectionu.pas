@@ -16,12 +16,17 @@ type
   private
     FConnection: TIBConnection;
     FTransaction: TSQLTransaction;
+    function GetConnected: Boolean;
+    function Connect_Internal( servername, databasename: string; var msg: string): Boolean;
   public
     property Transaction: TSQLTransaction read FTransaction write FTransaction;
     property Connection: TIBConnection read FConnection write FConnection;
+    property Connected: Boolean read GetConnected;
     constructor Create(AOwner: TComponent);
-    function Connect(const servername: string = ''; databasename: string = ''): Boolean;
+    function Connect(const servername: string = ''; databasename: string = ''): Boolean; overload;
+    function Connect(const servername: string; databasename: string; var msg: string): Boolean; overload;
     function ConnectDialog(const servername: string = ''; databasename: string = ''): Boolean;
+    function ConnectFiles( configFile: string; var msg: string ): Boolean;
     function connect_(s, d, u, p: string; var msg: string): Boolean;
   end;
     
@@ -31,26 +36,23 @@ var
 implementation
 
 uses
-  Dialogs, Forms, Controls, myUtils, changedatabaseform, IniFiles, md5;
+  Dialogs, Forms, Controls, myUtils, changedatabaseform, IniFiles;
 
 
 { TAppConnection }
 
-constructor TAppConnection.Create(AOwner: TComponent);
+function TAppConnection.GetConnected: Boolean;
 begin
-  FTransaction:= TSQLTransaction.Create(AOwner);
-  FConnection := TIBConnection.Create(AOwner);
-  FConnection.Transaction := FTransaction;
+  Result := FConnection.Connected;
 end;
 
-function TAppConnection.Connect(const servername: string; databasename: string
-  ): Boolean;
+function TAppConnection.Connect_Internal(servername, databasename: string;
+  var msg: string): Boolean;
+
 var
   dataDir : string;
   configfile : string;
   ini: TIniFile;
-  svr, db, usr, pwd: string;
-  saveIni: Boolean;
 
 begin
   Result := False;
@@ -62,51 +64,54 @@ begin
 
   configfile:= ChangeFileExt(dataDir + AppConfigFilename, '.fcr');
 
-  //if not FileExists(configfile) then
-  if true then
+  if FileExists(configfile) then
+    //connect using saved credentials
+    Result := ConnectFiles(configfile, msg);
+
+  if not Result then
+  //connect using change database form
   begin
-    //show change database form
-    ConnectDialog();
-  end
-  else
-  begin
+    Result := ConnectDialog(servername, databasename);
 
-  end;
-
-
-  ini := TIniFile.Create(configfile);
-  with ini do
-  try
-    saveIni:= not SectionExists('DB');
-    svr:= ReadString('DB', 'server', 'localhost');
-    db := ReadString('DB', 'database', '');
-    usr:= ReadString('DB', 'username', 'sysdba');
-    pwd:= ReadString('DB', 'pass', 'masterkey');
-    if db = '' then
-      db := 'c:\projects\NFAEA accounting\accounting.fdb';
-    FConnection.HostName:= svr;
-    FConnection.DatabaseName:= db;
-    FConnection.UserName:= usr;
-    FConnection.Password:= pwd;
-    //writeln(usr + ':' +pwd);
-    try
-      //FConnection.Connected:= True;
-    except
-      raise;
-      Result := False;
+    if Result then
+    begin
+      ini := TIniFile.Create(configfile);
+      with ini do
+      try
+        WriteString('db','s',FConnection.HostName);
+        WriteString('db','d',FConnection.DatabaseName);
+        WriteString('db','u',EncryptString(FConnection.UserName));
+        WriteString('db','p',EncryptString(FConnection.Password));
+        //todo: check encoding
+      finally
+        ini.Free;
+      end;
     end;
-  finally
-    if saveIni then begin
-      usr:= MD5Print(MD5String(usr));
-      pwd:= MD5Print(MD5String(pwd));
-      WriteString('DB', 'server', svr);
-      WriteString('DB', 'database', db);
-      WriteString('DB', 'username', usr);
-      WriteString('DB', 'pass', pwd);
-    end;
-    Free;
   end;
+end;
 
+constructor TAppConnection.Create(AOwner: TComponent);
+begin
+  FTransaction:= TSQLTransaction.Create(AOwner);
+  FConnection := TIBConnection.Create(AOwner);
+  FConnection.Transaction := FTransaction;
+  writeln(EncryptString('masterkey'));
+  writeln(DecryptString(EncryptString('masterkey')));
+end;
+
+function TAppConnection.Connect(const servername: string; databasename: string
+  ): Boolean; overload;
+var
+  msg: string;
+begin
+  msg := '';
+  Result := Connect_Internal(servername, databasename, msg);
+end;
+
+function TAppConnection.Connect(const servername: string; databasename: string;
+  var msg: string): Boolean; overload;
+begin
+  Result := Connect_Internal(servername, databasename, msg);
 end;
 
 function TAppConnection.ConnectDialog(const servername: string;
@@ -121,21 +126,34 @@ begin
     edtServer.Text := servername;
     edtDatabase.Text := databasename;
     if ShowModal = mrOk then
-      begin
-        FConnection.HostName := edtServer.text;
-        FConnection.DatabaseName  := edtDatabase.Text;
-        FConnection.UserName := edtUser.Text;
-        FConnection.Password := edtPass.Text;
-        try
-          FConnection.Connected:= True;
-          Result := True;
-        except
-          Result := False;
-          raise;
-        end;
-      end;
+      if (ConnectCallback <> nil) and FConnection.Connected then
+        Result := True
   finally
     free;
+  end;
+end;
+
+function TAppConnection.ConnectFiles(configFile: string; var msg: string
+  ): Boolean;
+var
+  ini : TIniFile;
+  s, d, u, p: string;
+begin
+  Result := False;
+  ini := TIniFile.Create(configFile);
+  with ini do
+  try
+    s:= ReadString('db','s','');
+    d:= ReadString('db','d','');
+    u:= ReadString('db','u','');
+    p:= ReadString('db','p','');
+    writeln(p);
+    u:= DecryptString(u);
+    p:= DecryptString(p);
+    writeln(p);
+    Result := connect_(s, d, u, p, msg);
+  finally
+    ini.Free;
   end;
 end;
 
@@ -147,7 +165,8 @@ begin
   FConnection.UserName:= u;
   FConnection.Password:= p;
   try
-    FConnection.Connected:= True;
+    FConnection.Close;
+    FConnection.Open;
     Result := True;
   except
       on e: Exception do

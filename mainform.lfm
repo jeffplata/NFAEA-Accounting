@@ -4,8 +4,18 @@ object fmMain: TfmMain
   Top = 169
   Width = 783
   Caption = 'Accounting'
+  ClientHeight = 358
+  ClientWidth = 783
   Menu = MainMenu1
+  OnActivate = FormActivate
   LCLVersion = '2.0.10.0'
+  object StatusBar1: TStatusBar
+    Left = 0
+    Height = 23
+    Top = 335
+    Width = 783
+    Panels = <>
+  end
   object MainMenu1: TMainMenu
     Left = 24
     Top = 8
@@ -40,6 +50,7 @@ object fmMain: TfmMain
     end
     object actSetdatabase: TAction
       Caption = 'Set &database...'
+      OnExecute = actSetdatabaseExecute
     end
   end
 end

@@ -14,9 +14,10 @@ type
   TdmMain = class(TDataModule)
     procedure DataModuleCreate(Sender: TObject);
   private
-
+    FisConnected: boolean;
   public
-
+    property isConnected: boolean read FisConnected;
+    procedure SetDatabase;
   end;
 
 var
@@ -36,7 +37,14 @@ begin
   writeln('Project Options.../ Compiler Options/ Config and Target/ Win32...');
   writeln('Debug / Development only; disable in Production.');
   writeln;
-  AppConnection.Connect();
+  FisConnected := AppConnection.Connect();
+end;
+
+procedure TdmMain.SetDatabase;
+begin
+  AppConnection.ConnectDialog(AppConnection.Connection.HostName,
+    AppConnection.Connection.DatabaseName);
+  FisConnected:= AppConnection.Connection.Connected;
 end;
 
 end.

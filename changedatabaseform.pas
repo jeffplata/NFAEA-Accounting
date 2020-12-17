@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  ActnList, Buttons, uGifViewer, uPSComponent;
+  ActnList, Buttons;
 
 type
 
@@ -61,6 +61,7 @@ procedure TfrmChangeDatabase.FormCreate(Sender: TObject);
 begin
   OpenDialog1.InitialDir:= AppDataDirectory;
   lblStatus.Caption := '';
+
 end;
 
 procedure TfrmChangeDatabase.actOkExecute(Sender: TObject);
@@ -73,16 +74,24 @@ begin
   u := edtUser.Text;
   p := edtPass.Text;
 
-  btnOk.Enabled:= false;
-  connected_ := ConnectCallback(s,d, u, p, msg);   
-  if connected_ then
-    ModalResult:= mrOk
+  if ConnectCallback <> nil then
+  begin
+    lblStatus.Show;
+    btnOk.Enabled:= false;
+    msg := '';
+    connected_ := ConnectCallback(s,d, u, p, msg);
+    if connected_ then
+      ModalResult:= mrOk
+    else
+      begin
+        MessageDlg('Info', msg, mtConfirmation, [mbOk], 0);
+        edtUser.SetFocus;
+      end;
+    btnOk.Enabled := true;
+    lblStatus.Hide;
+  end
   else
-    begin
-      MessageDlg('Info', msg, mtConfirmation, [mbOk], 0);
-      edtUser.SetFocus;
-    end;
-  btnOk.Enabled := true;
+    ModalResult:= mrOk;
 
 end;
 
