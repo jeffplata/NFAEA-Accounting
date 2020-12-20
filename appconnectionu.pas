@@ -33,6 +33,9 @@ type
 var
   AppConnection : TAppConnection;
 
+const
+  BRK = '/BRK/';
+
 implementation
 
 uses
@@ -80,8 +83,8 @@ begin
       try
         WriteString('db','s',FConnection.HostName);
         WriteString('db','d',FConnection.DatabaseName);
-        WriteString('db','u',EncryptString(FConnection.UserName));
-        WriteString('db','p',EncryptString(FConnection.Password));
+        WriteString('db','u',BRK+EncryptString(FConnection.UserName)+BRK);
+        WriteString('db','p',BRK+EncryptString(FConnection.Password)+BRK);
         //todo: check encoding
       finally
         ini.Free;
@@ -95,8 +98,6 @@ begin
   FTransaction:= TSQLTransaction.Create(AOwner);
   FConnection := TIBConnection.Create(AOwner);
   FConnection.Transaction := FTransaction;
-  writeln(EncryptString('masterkey'));
-  writeln(DecryptString(EncryptString('masterkey')));
 end;
 
 function TAppConnection.Connect(const servername: string; databasename: string
@@ -147,10 +148,8 @@ begin
     d:= ReadString('db','d','');
     u:= ReadString('db','u','');
     p:= ReadString('db','p','');
-    writeln(p);
-    u:= DecryptString(u);
-    p:= DecryptString(p);
-    writeln(p);
+    u:= DecryptString(StringReplace(u,BRK,'',[rfReplaceAll]));
+    p:= DecryptString(StringReplace(p,brk,'',[rfReplaceAll]));
     Result := connect_(s, d, u, p, msg);
   finally
     ini.Free;
