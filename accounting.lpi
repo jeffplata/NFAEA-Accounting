@@ -40,7 +40,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="accounting.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -78,6 +78,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="appuserunit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="appUserUnit"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

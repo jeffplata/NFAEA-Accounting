@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, mainForm, appConnectionU, mainDM, myUtils, changedatabaseform,
-  pascalscript;
+  pascalscript, appUserUnit;
 
 {$R *.res}
 
