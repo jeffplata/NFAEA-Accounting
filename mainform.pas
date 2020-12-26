@@ -5,7 +5,7 @@ unit mainForm;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Menus, ActnList,
+  Forms, Menus, ActnList,
   ComCtrls;
 
 type
@@ -41,7 +41,7 @@ var
 implementation
 
 uses
-  appConnectionU, mainDM;
+  mainDM;
 
 {$R *.lfm}
 

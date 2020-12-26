@@ -20,7 +20,6 @@ type
     property TAppConnection: TAppConnection read FConnection;
     property isConnected: boolean read FisConnected;
     procedure SetDatabase;
-    procedure test_user_table;
   end;
 
 var
@@ -41,8 +40,10 @@ begin
   writeln('Debug / Development only; disable in Production.');
   writeln;
   FConnection:= AppConnection;
-  FisConnected := AppConnection.Connect();
-  test_user_table;
+  FisConnected := AppConnection.Connected;
+  if FisConnected then
+    AppUser.Login();
+  //test_user_table;
 end;
 
 procedure TdmMain.SetDatabase;
@@ -52,26 +53,7 @@ begin
   FisConnected:= AppConnection.Connection.Connected;
 end;
 
-procedure TdmMain.test_user_table;
-var
-  query: TSQLQuery;
-  f: TField;
-begin
-  query := TSQLQuery.Create(self);
-  with query do
-  try
-    DataBase := AppConnection.Connection;
-    SQL.add('select * from rdb$relations where rdb$flags=1');
-    Open;
-    while not EOF do begin
-      writeln(FieldByName('rdb$relation_name').AsString);
-      Next;
-    end;
-  finally
-    free;
-  end;
 
-end;
 
 end.
 

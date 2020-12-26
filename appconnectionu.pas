@@ -85,7 +85,6 @@ begin
         WriteString('db','d',FConnection.DatabaseName);
         WriteString('db','u',BRK+EncryptString(FConnection.UserName)+BRK);
         WriteString('db','p',BRK+EncryptString(FConnection.Password)+BRK);
-        //todo: check encoding
       finally
         ini.Free;
       end;
@@ -98,6 +97,7 @@ begin
   FTransaction:= TSQLTransaction.Create(AOwner);
   FConnection := TIBConnection.Create(AOwner);
   FConnection.Transaction := FTransaction;
+  Connect();
 end;
 
 function TAppConnection.Connect(const servername: string; databasename: string
