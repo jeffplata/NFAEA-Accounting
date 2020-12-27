@@ -8,21 +8,23 @@ uses
   Classes, SysUtils, SQLDB, IBConnection;
 
 type
+  TConnectionType = TIBConnection;
   TConnectCallback = function(s, d, u, p: string; var msg: string): Boolean of object;
   { TAppConnection }
 
-  TAppConnection = class(TObject)
+  TAppConnection = class(TComponent)
 
   private
-    FConnection: TIBConnection;
+    FConnection: TConnectionType;
     FTransaction: TSQLTransaction;
     function GetConnected: Boolean;
     function Connect_Internal( servername, databasename: string; var msg: string): Boolean;
   public
     property Transaction: TSQLTransaction read FTransaction write FTransaction;
-    property Connection: TIBConnection read FConnection write FConnection;
+    property Connection: TConnectionType read FConnection write FConnection;
     property Connected: Boolean read GetConnected;
-    constructor Create(AOwner: TComponent);
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
     function Connect(const servername: string = ''; databasename: string = ''): Boolean; overload;
     function Connect(const servername: string; databasename: string; var msg: string): Boolean; overload;
     function ConnectDialog(const servername: string = ''; databasename: string = ''): Boolean;
@@ -94,10 +96,20 @@ end;
 
 constructor TAppConnection.Create(AOwner: TComponent);
 begin
+  inherited Create(AOwner);
   FTransaction:= TSQLTransaction.Create(AOwner);
   FConnection := TIBConnection.Create(AOwner);
   FConnection.Transaction := FTransaction;
   Connect();
+
+  AppConnection := Self;
+end;
+
+destructor TAppConnection.Destroy;
+begin
+  FTransaction.Free;
+  FConnection.Free;
+  inherited Destroy;
 end;
 
 function TAppConnection.Connect(const servername: string; databasename: string
@@ -178,11 +190,11 @@ begin
   end;
 end;
 
-initialization
-  AppConnection := TAppConnection.Create(nil);
-
-finalization
-  AppConnection.Free;
-
+//initialization
+//  AppConnection := TAppConnection.Create(nil);
+//
+//finalization
+//  AppConnection.Free;
+//
 end.
 

@@ -40,7 +40,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="8">
+    <Units Count="9">
       <Unit0>
         <Filename Value="accounting.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -91,6 +91,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UserLoginForm"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="hilogeneratoru.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="hilogeneratorU"/>
+      </Unit8>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -103,6 +108,11 @@
       <IncludeFiles Value="$(ProjOutDir)"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <Linking>
+      <Debugging>
+        <UseHeaptrc Value="True"/>
+      </Debugging>
+    </Linking>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

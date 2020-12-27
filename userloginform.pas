@@ -10,7 +10,7 @@ uses
 
 type
               
-  TLoginCallback = function(u, p: string; var msg: string): Boolean of object;
+  TLoginCallback = function(u, p, r: string; var msg: string): Boolean of object;
 
   { TfrmUserLogin }
 
@@ -47,7 +47,7 @@ end;
 
 procedure TfrmUserLogin.actOkExecute(Sender: TObject);
 var
-  u, p, msg: string;
+  u, p, r, msg: string;
 begin
   if LoginCallback <> nil then
   begin
@@ -55,7 +55,10 @@ begin
     msg := '';
     u := edtUsername.text;
     p := edtPassword.text;
-    if LoginCallback(u, p, msg) then
+    r := '0';
+    if chkRememberme.Checked then
+      r := '1';
+    if LoginCallback(u, p, r, msg) then
       ModalResult:= mrOk
     else
       begin

@@ -3,3 +3,7 @@ s=localhost
 d=C:\projects\NFAEA Accounting\ACCOUNTING.FDB
 u=/BRK/DÏË7'‚°¦äÎCÚy/BRK/
 p=/BRK/ˆ@A)µ›WfÓ¿²"$¦/BRK/
+
+[hilo]
+hi=1
+lo=3

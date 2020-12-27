@@ -6,7 +6,7 @@ interface
 
 uses
   Forms, Menus, ActnList,
-  ComCtrls;
+  ComCtrls, SQLDB, Classes;
 
 type
 
@@ -15,17 +15,21 @@ type
   TfmMain = class(TForm)
     actExit: TAction;
     actAbout: TAction;
+    actLogout: TAction;
     actSetdatabase: TAction;
     ActionList1: TActionList;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    MenuItem4: TMenuItem;
     Setdatabase1: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
     MenuItem3: TMenuItem;
     StatusBar1: TStatusBar;
     procedure actExitExecute(Sender: TObject);
+    procedure actLogoutExecute(Sender: TObject);
+    procedure actLogoutUpdate(Sender: TObject);
     procedure actSetdatabaseExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
   private
@@ -52,6 +56,21 @@ begin
   close;
 end;
 
+procedure TfmMain.actLogoutExecute(Sender: TObject);
+begin
+  dmMain.User.Logout;
+  UpdateConnectedIndicator;
+  if dmMain.User.LoginDialog then
+    UpdateConnectedIndicator
+  else
+    actExit.Execute;
+end;
+
+procedure TfmMain.actLogoutUpdate(Sender: TObject);
+begin
+  (Sender as TAction).enabled := dmMain.User.Loggedin;
+end;
+
 procedure TfmMain.actSetdatabaseExecute(Sender: TObject);
 begin
   dmMain.SetDatabase;
@@ -64,11 +83,20 @@ begin
 end;
 
 procedure TfmMain.UpdateConnectedIndicator;
+var
+  st_text : String;
 begin  
   if dmMain.isConnected then
-    StatusBar1.SimpleText := 'Connected'
+    st_text := 'Connected'
   else
-    StatusBar1.SimpleText:= 'Not connected';
+    st_text := 'Not connected';
+
+  if dmMain.User.Loggedin then
+    st_text := st_text + ' | Logged in'
+  else
+    st_text := st_text + ' | Not logged in';
+
+  StatusBar1.SimpleText := st_text;
 end;
 
 end.

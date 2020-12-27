@@ -2,10 +2,10 @@ object fmMain: TfmMain
   Left = 246
   Height = 378
   Top = 169
-  Width = 783
+  Width = 785
   Caption = 'Accounting'
   ClientHeight = 358
-  ClientWidth = 783
+  ClientWidth = 785
   Menu = MainMenu1
   OnActivate = FormActivate
   LCLVersion = '2.0.10.0'
@@ -13,7 +13,7 @@ object fmMain: TfmMain
     Left = 0
     Height = 23
     Top = 335
-    Width = 783
+    Width = 785
     Panels = <>
   end
   object MainMenu1: TMainMenu
@@ -21,6 +21,9 @@ object fmMain: TfmMain
     Top = 8
     object MenuItem3: TMenuItem
       Caption = '&File'
+      object MenuItem4: TMenuItem
+        Action = actLogout
+      end
       object Setdatabase1: TMenuItem
         Action = actSetdatabase
       end
@@ -51,6 +54,11 @@ object fmMain: TfmMain
     object actSetdatabase: TAction
       Caption = 'Set &database...'
       OnExecute = actSetdatabaseExecute
+    end
+    object actLogout: TAction
+      Caption = 'L&ogout'
+      OnExecute = actLogoutExecute
+      OnUpdate = actLogoutUpdate
     end
   end
 end
