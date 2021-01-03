@@ -26,21 +26,24 @@
       <FormatVersion Value="2"/>
       <Modes Count="0"/>
     </RunParams>
-    <RequiredPackages Count="4">
+    <RequiredPackages Count="5">
       <Item1>
-        <PackageName Value="gifviewer_pkg"/>
+        <PackageName Value="virtualtreeview_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="pascalscript"/>
+        <PackageName Value="gifviewer_pkg"/>
       </Item2>
       <Item3>
-        <PackageName Value="FCL"/>
+        <PackageName Value="pascalscript"/>
       </Item3>
       <Item4>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
       </Item4>
+      <Item5>
+        <PackageName Value="LCL"/>
+      </Item5>
     </RequiredPackages>
-    <Units Count="9">
+    <Units Count="12">
       <Unit0>
         <Filename Value="accounting.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -79,9 +82,9 @@
         <ResourceBaseClass Value="Form"/>
       </Unit5>
       <Unit6>
-        <Filename Value="appuserunit.pas"/>
+        <Filename Value="appuseru.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="appUserUnit"/>
+        <UnitName Value="appUserU"/>
       </Unit6>
       <Unit7>
         <Filename Value="userloginform.pas"/>
@@ -96,6 +99,24 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="hilogeneratorU"/>
       </Unit8>
+      <Unit9>
+        <Filename Value="usermanagerform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmUserManager"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UserManagerForm"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="usermanageru.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UserManagerU"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="user_bom.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="user_BOM"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -15,6 +15,7 @@ type
   TfmMain = class(TForm)
     actExit: TAction;
     actAbout: TAction;
+    actUserManager: TAction;
     actLogout: TAction;
     actSetdatabase: TAction;
     ActionList1: TActionList;
@@ -22,6 +23,7 @@ type
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem4: TMenuItem;
+    MenuItem5: TMenuItem;
     Setdatabase1: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
@@ -31,6 +33,7 @@ type
     procedure actLogoutExecute(Sender: TObject);
     procedure actLogoutUpdate(Sender: TObject);
     procedure actSetdatabaseExecute(Sender: TObject);
+    procedure actUserManagerExecute(Sender: TObject);
     procedure FormActivate(Sender: TObject);
   private
     procedure UpdateConnectedIndicator;
@@ -58,7 +61,7 @@ end;
 
 procedure TfmMain.actLogoutExecute(Sender: TObject);
 begin
-  dmMain.User.Logout;
+  dmMain.User.Logout(True);
   UpdateConnectedIndicator;
   if dmMain.User.LoginDialog then
     UpdateConnectedIndicator
@@ -75,6 +78,11 @@ procedure TfmMain.actSetdatabaseExecute(Sender: TObject);
 begin
   dmMain.SetDatabase;
   UpdateConnectedIndicator;
+end;
+
+procedure TfmMain.actUserManagerExecute(Sender: TObject);
+begin
+  dmMain.UserManager.OpenForm;
 end;
 
 procedure TfmMain.FormActivate(Sender: TObject);

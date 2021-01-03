@@ -1,19 +1,20 @@
 object fmMain: TfmMain
-  Left = 246
+  Left = 299
   Height = 378
-  Top = 169
-  Width = 785
+  Top = 174
+  Width = 752
   Caption = 'Accounting'
   ClientHeight = 358
-  ClientWidth = 785
+  ClientWidth = 752
   Menu = MainMenu1
   OnActivate = FormActivate
+  Position = poWorkAreaCenter
   LCLVersion = '2.0.10.0'
   object StatusBar1: TStatusBar
     Left = 0
     Height = 23
     Top = 335
-    Width = 785
+    Width = 752
     Panels = <>
   end
   object MainMenu1: TMainMenu
@@ -26,6 +27,9 @@ object fmMain: TfmMain
       end
       object Setdatabase1: TMenuItem
         Action = actSetdatabase
+      end
+      object MenuItem5: TMenuItem
+        Action = actUserManager
       end
       object MenuItem11: TMenuItem
         Caption = '-'
@@ -59,6 +63,10 @@ object fmMain: TfmMain
       Caption = 'L&ogout'
       OnExecute = actLogoutExecute
       OnUpdate = actLogoutUpdate
+    end
+    object actUserManager: TAction
+      Caption = 'Manage &users...'
+      OnExecute = actUserManagerExecute
     end
   end
 end

@@ -8,7 +8,8 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, mainForm, appConnectionU, mainDM, myUtils, changedatabaseform,
-  pascalscript, appUserUnit, UserLoginForm, hilogeneratorU;
+  pascalscript, appUserU, UserLoginForm, hilogeneratorU, UserManagerForm,
+  UserManagerU, user_BOM;
 
 {$R *.res}
 
@@ -18,7 +19,6 @@ begin
   Application.Initialize;
   Application.CreateForm(TdmMain, dmMain);
   Application.CreateForm(TfmMain, fmMain);
-  Application.CreateForm(TfrmUserLogin, frmUserLogin);
   Application.Run;
 end.
 

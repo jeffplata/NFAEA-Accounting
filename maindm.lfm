@@ -3,7 +3,7 @@ object dmMain: TdmMain
   OnDestroy = DataModuleDestroy
   OldCreateOrder = False
   Height = 150
-  HorizontalOffset = 257
-  VerticalOffset = 250
+  HorizontalOffset = 258
+  VerticalOffset = 251
   Width = 150
 end

@@ -1,0 +1,180 @@
+object frmUserManager: TfrmUserManager
+  Left = 395
+  Height = 288
+  Top = 179
+  Width = 480
+  Caption = 'User Manager'
+  ClientHeight = 288
+  ClientWidth = 480
+  OnActivate = FormActivate
+  OnCreate = FormCreate
+  Position = poMainFormCenter
+  LCLVersion = '2.0.10.0'
+  object btnClose: TButton
+    Left = 397
+    Height = 25
+    Top = 256
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = 'Close'
+    OnClick = btnCloseClick
+    TabOrder = 0
+  end
+  object PageControl1: TPageControl
+    Left = 8
+    Height = 240
+    Top = 8
+    Width = 464
+    ActivePage = tabUsers
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    TabIndex = 0
+    TabOrder = 1
+    OnChange = PageControl1Change
+    object tabUsers: TTabSheet
+      Caption = 'Users'
+      ClientHeight = 212
+      ClientWidth = 456
+      object lvUsers: TListView
+        Left = 8
+        Height = 136
+        Top = 8
+        Width = 256
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        AutoWidthLastColumn = True
+        Columns = <        
+          item
+            Width = 252
+          end>
+        HideSelection = False
+        OwnerData = True
+        ShowColumnHeaders = False
+        TabOrder = 3
+        ViewStyle = vsReport
+        OnData = lvUsersData
+        OnSelectItem = lvUsersSelectItem
+      end
+      object edtUser: TEdit
+        Left = 8
+        Height = 23
+        Top = 152
+        Width = 256
+        Anchors = [akLeft, akRight, akBottom]
+        TabOrder = 0
+      end
+      object btnAddUser: TButton
+        Left = 8
+        Height = 25
+        Top = 184
+        Width = 75
+        Action = actAddUser
+        Anchors = [akLeft, akBottom]
+        TabOrder = 1
+      end
+      object btnRemoveUser: TButton
+        Left = 88
+        Height = 25
+        Top = 184
+        Width = 75
+        Action = actDeleteUser
+        Anchors = [akLeft, akBottom]
+        TabOrder = 2
+      end
+      object Label1: TLabel
+        Left = 272
+        Height = 15
+        Top = 8
+        Width = 79
+        Caption = 'Assigned roles:'
+        ParentColor = False
+      end
+      object lvAssignedRoles: TListView
+        Left = 272
+        Height = 80
+        Top = 32
+        Width = 178
+        AutoWidthLastColumn = True
+        Columns = <        
+          item
+            Width = 174
+          end>
+        HideSelection = False
+        OwnerData = True
+        ShowColumnHeaders = False
+        TabOrder = 4
+        ViewStyle = vsReport
+        OnData = lvAssignedRolesData
+      end
+      object cmbRoles: TComboBox
+        Left = 272
+        Height = 23
+        Top = 118
+        Width = 178
+        ItemHeight = 15
+        Style = csDropDownList
+        TabOrder = 5
+      end
+      object Button1: TButton
+        Left = 272
+        Height = 25
+        Top = 150
+        Width = 80
+        Action = actAssignRole
+        TabOrder = 6
+      end
+      object Button2: TButton
+        Left = 352
+        Height = 25
+        Top = 150
+        Width = 80
+        Action = actRemoveRole
+        TabOrder = 7
+      end
+    end
+    object tabRoles: TTabSheet
+      Caption = 'Roles'
+      ClientHeight = 212
+      ClientWidth = 456
+      object lvRoles: TListView
+        Left = 8
+        Height = 136
+        Top = 8
+        Width = 256
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        AutoWidthLastColumn = True
+        Columns = <        
+          item
+            Width = 252
+          end>
+        HideSelection = False
+        OwnerData = True
+        ShowColumnHeaders = False
+        TabOrder = 0
+        ViewStyle = vsReport
+        OnData = lvRolesData
+      end
+    end
+  end
+  object ActionList1: TActionList
+    Left = 40
+    Top = 112
+    object actAddUser: TAction
+      Caption = 'Add user'
+      OnExecute = actAddUserExecute
+      OnUpdate = actAddUserUpdate
+    end
+    object actDeleteUser: TAction
+      Caption = 'Delete user'
+      OnExecute = actDeleteUserExecute
+      OnUpdate = actDeleteUserUpdate
+    end
+    object actAssignRole: TAction
+      Caption = 'Assign role'
+      OnExecute = actAssignRoleExecute
+    end
+    object actRemoveRole: TAction
+      Caption = 'Remove role'
+      OnExecute = actRemoveRoleExecute
+    end
+  end
+end

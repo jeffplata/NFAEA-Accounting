@@ -1,4 +1,4 @@
-unit appUserUnit;
+unit appUserU;
 
 {$mode objfpc}{$H+}
 
@@ -38,7 +38,7 @@ type
     function Login: Boolean;
     function LoginDialog: Boolean;
     function LoginFiles(var msg: string): Boolean;
-    function Logout: Boolean;
+    function Logout(const eraseFromFile: Boolean=False): Boolean;
     function AddUser( AUser, APass: string ): Boolean;
     function AddRole( ARole_name, ALabel: string ): Boolean; 
     function AddUserRoles( AUser, ARole: string ): Boolean;
@@ -264,20 +264,20 @@ begin
 
 end;
 
-function TAppUser.Logout: Boolean;
+function TAppUser.Logout( const eraseFromFile: Boolean = False ): Boolean;
 begin
   FLoggedin:= False;
   FUsername:= '';
   FPass:= '';
   FRememberme:= '0';
   Result := True;
-  with TIniFile.Create(FConfigfile) do
-  try
-    EraseSection('user');
-  finally
-    Free;
-  end;
-  //TODO: User Manager form
+  if eraseFromFile then
+    with TIniFile.Create(FConfigfile) do
+    try
+      EraseSection('user');
+    finally
+      Free;
+    end;
 end;
 
 function TAppUser.AddUser(AUser, APass: string): Boolean;

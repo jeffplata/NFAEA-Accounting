@@ -5,8 +5,8 @@ unit mainDM;
 interface
 
 uses
-  Classes, SysUtils, hilogeneratorU, appConnectionU, appUserUnit, IBConnection,
-  SQLDB;
+  Classes, SysUtils, hilogeneratorU, appConnectionU, appUserU, UserManagerU,
+  IBConnection, SQLDB;
 
 type
 
@@ -18,13 +18,15 @@ type
   private
     FConnection: TAppConnection;
     FHiLoGenerator: THiloGenerator;
-    FisConnected: boolean;
     FUser: TAppUser;
+    FUserManager: TUserManager;
+    function GetisConnected: boolean;
   public
     property Connection: TAppConnection read FConnection;
-    property isConnected: boolean read FisConnected;
+    property isConnected: boolean read GetisConnected;
     property User: TAppUser read FUser write FUser;
     property HiLoGenerator: THiloGenerator read FHiLoGenerator write FHiLoGenerator;
+    property UserManager: TUserManager read FUserManager write FUserManager;
     procedure SetDatabase;
   end;
 
@@ -49,8 +51,7 @@ begin
   FConnection:= TAppConnection.Create(self);
   FHiLoGenerator:= THiloGenerator.Create;
   FUser := TAppUser.Create;
-  FisConnected := FConnection.Connected;
-  if FisConnected then
+  if GetisConnected then
     FUser.Login();
 end;
 
@@ -61,11 +62,19 @@ begin
   FConnection.Free;
 end;
 
+function TdmMain.GetisConnected: boolean;
+begin
+  result := FConnection.Connected;
+end;
+
 procedure TdmMain.SetDatabase;
 begin
-  FConnection.ConnectDialog(FConnection.Connection.HostName,
-    FConnection.Connection.DatabaseName);
-  FisConnected:= FConnection.Connection.Connected;
+  if FConnection.ConnectDialog(FConnection.Connection.HostName,
+    FConnection.Connection.DatabaseName) then
+  begin
+    FUser.Logout;
+    FUser.Login;
+  end;
 end;
 
 
