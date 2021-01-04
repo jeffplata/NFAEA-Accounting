@@ -69,23 +69,6 @@ object frmUserManager: TfrmUserManager
         Caption = 'Assigned roles:'
         ParentColor = False
       end
-      object lvAssignedRoles: TListView
-        Left = 272
-        Height = 80
-        Top = 32
-        Width = 178
-        AutoWidthLastColumn = True
-        Columns = <        
-          item
-            Width = 174
-          end>
-        HideSelection = False
-        OwnerData = True
-        ShowColumnHeaders = False
-        TabOrder = 3
-        ViewStyle = vsReport
-        OnData = lvAssignedRolesData
-      end
       object cmbRoles: TComboBox
         Left = 272
         Height = 23
@@ -93,7 +76,7 @@ object frmUserManager: TfrmUserManager
         Width = 178
         ItemHeight = 15
         Style = csDropDownList
-        TabOrder = 4
+        TabOrder = 3
       end
       object Button1: TButton
         Left = 272
@@ -101,7 +84,7 @@ object frmUserManager: TfrmUserManager
         Top = 150
         Width = 80
         Action = actAssignRole
-        TabOrder = 5
+        TabOrder = 4
       end
       object Button2: TButton
         Left = 352
@@ -109,7 +92,7 @@ object frmUserManager: TfrmUserManager
         Top = 150
         Width = 80
         Action = actRemoveRole
-        TabOrder = 6
+        TabOrder = 5
       end
       object vstUser: TVirtualStringTree
         Left = 8
@@ -121,10 +104,23 @@ object frmUserManager: TfrmUserManager
         Header.AutoSizeIndex = 0
         Header.Columns = <>
         Header.MainColumn = -1
-        TabOrder = 7
+        TabOrder = 6
         TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toShowTreeLines, toThemeAware, toUseBlendedImages]
+        OnChange = vstUserChange
         OnGetText = vstUserGetText
-        OnInitNode = vstUserInitNode
+      end
+      object vstAssignedRoles: TVirtualStringTree
+        Left = 272
+        Height = 80
+        Top = 29
+        Width = 178
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        DefaultText = 'Node'
+        Header.AutoSizeIndex = 0
+        Header.Columns = <>
+        Header.MainColumn = -1
+        TabOrder = 7
+        OnGetText = vstAssignedRolesGetText
       end
     end
     object tabRoles: TTabSheet

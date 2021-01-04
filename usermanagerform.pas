@@ -11,6 +11,8 @@ uses
 type
 
   PUserTreeData = ^TUser;
+  PAssignedRoleTreeData = ^TAssignedRole;
+
   //TUserTreeData = record
   //  User: TUser;
   //end;
@@ -31,11 +33,11 @@ type
     cmbRoles: TComboBox;
     edtUser: TEdit;
     Label1: TLabel;
-    lvAssignedRoles: TListView;
     lvRoles: TListView;
     PageControl1: TPageControl;
     tabUsers: TTabSheet;
     tabRoles: TTabSheet;
+    vstAssignedRoles: TVirtualStringTree;
     vstUser: TVirtualStringTree;
     procedure actAddUserExecute(Sender: TObject);
     procedure actAddUserUpdate(Sender: TObject);
@@ -46,19 +48,20 @@ type
     procedure btnCloseClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure lvAssignedRolesData(Sender: TObject; Item: TListItem);
     procedure lvRolesData(Sender: TObject; Item: TListItem);
     procedure PageControl1Change(Sender: TObject);
+    procedure vstAssignedRolesGetText(Sender: TBaseVirtualTree;
+      Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: String);
+    procedure vstUserChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure vstUserGetText(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: String);
-    procedure vstUserInitNode(Sender: TBaseVirtualTree; ParentNode,
-      Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
   private
     FRoles: TRoles;
-    FSelectedUser: TUser;
     FUsers: TUsers;
     function GetSelectedUser: TUser;
+    procedure UpdateAssignedRolesView();
   private
     property SelectedUser: TUser read GetSelectedUser;
     //property SelectedUser: TUser read FSelectedUser write FSelectedUser;
@@ -91,19 +94,6 @@ begin
   PageControl1.ActivePage := tabUsers;
 end;
 
-procedure TfrmUserManager.lvAssignedRolesData(Sender: TObject; Item: TListItem);
-var
-  ar: TAssignedRole;
-begin
-  try
-    ar := TAssignedRole(SelectedUser.Roles[Item.Index]);
-    Item.Caption:= ar.Rolename;
-  except
-    item.caption := selecteduser.Username;
-  end;
-
-end;
-
 procedure TfrmUserManager.lvRolesData(Sender: TObject; Item: TListItem);
 var
   r: TRole;
@@ -112,14 +102,26 @@ begin
   Item.Caption := r.Rolename;
 end;
 
-
-
-
-
 procedure TfrmUserManager.PageControl1Change(Sender: TObject);
 begin
   if PageControl1.ActivePage = tabUsers then
     edtUser.SetFocus;
+end;
+
+procedure TfrmUserManager.vstAssignedRolesGetText(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+  var CellText: String);
+var
+  Data: PAssignedRoleTreeData;
+begin
+  Data := (sender as TBaseVirtualTree).GetNodeData(Node);
+  CellText := Data^.Rolename;
+end;
+
+procedure TfrmUserManager.vstUserChange(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+begin
+  UpdateAssignedRolesView();
 end;
 
 procedure TfrmUserManager.vstUserGetText(Sender: TBaseVirtualTree;
@@ -132,15 +134,6 @@ begin
   CellText := Data^.Username;
 end;
 
-procedure TfrmUserManager.vstUserInitNode(Sender: TBaseVirtualTree; ParentNode,
-  Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
-var
-  Data: PUserTreeData;
-begin
-  //Data := (Sender as TBaseVirtualTree).GetNodeData(Node);
-  //Data^.Username:= FUsers[Node^.Index].Username;
-end;
-
 function TfrmUserManager.GetSelectedUser: TUser;
 var
   node: PVirtualNode;
@@ -151,7 +144,16 @@ begin
   if not assigned(node) then exit;
   ind := vstUser.AbsoluteIndex(node);
   result := FUsers[ind];
-  //todo: continue the fun here
+end;
+
+procedure TfrmUserManager.UpdateAssignedRolesView();
+var
+  i: Integer;
+begin
+  vstAssignedRoles.Clear;
+  //todo: check error here
+  for i := 0 to SelectedUser.Roles.Count-1 do
+    vstAssignedRoles.AddChild(nil,SelectedUser.Roles[i]);
 end;
 
 procedure TfrmUserManager.actAddUserExecute(Sender: TObject);
@@ -202,7 +204,7 @@ begin
     r.RoleID:= Integer(cmbRoles.Items.Objects[cmbRoles.ItemIndex]);
     r.Rolename:= cmbRoles.Text;
     SelectedUser.Roles.Add(r);
-    lvAssignedRoles.Items.Count := SelectedUser.Roles.Count;
+    //lvAssignedRoles.Items.Count := SelectedUser.Roles.Count;
   end;
 end;
 
@@ -230,16 +232,24 @@ begin
 end;
 
 procedure TfrmUserManager.actRemoveRoleExecute(Sender: TObject);
+var
+  node, nextnode : PVirtualNode;
+  ind: Cardinal;
 begin
-  if Assigned(lvAssignedRoles.Selected) then
+  node := vstAssignedRoles.GetFirstSelected();
+  if not assigned(node) then exit;
+  ind := vstAssignedRoles.AbsoluteIndex(node);
+  nextnode := node^.NextSibling;
+  if nextnode = nil then nextnode := node^.PrevSibling;
+  ind := vstUser.AbsoluteIndex(node);
+
+  if (SelectedUser.Username='admin') and (PAssignedRoleTreeData(node)^.Rolename='admin') then
+    MessageDlg('Action not allowed.',mtInformation,[mbOk],0)
+  else
   begin
-    if (SelectedUser.Username='admin') and (lvAssignedRoles.Selected.Caption='admin') then
-      MessageDlg('Action not allowed.',mtInformation,[mbOk],0)
-    else
-    begin
-      SelectedUser.Roles.Delete(lvAssignedRoles.Selected.Index);
-      lvAssignedRoles.Items.Count := SelectedUser.Roles.Count;
-    end;
+    SelectedUser.Roles.Delete(ind);
+    vstAssignedRoles.DeleteNode(node);
+    vstAssignedRoles.Selected[nextnode] := True;
   end;
 end;
 
@@ -253,9 +263,9 @@ begin
     lvRoles.Items.Count := FRoles.Count;
     FUsers := AUsers;
     //vstUser.RootNodeCount:= 3;
-    //vstUser.AddChild(nil,FUsers[0]);
-    //vstUser.AddChild(nil,FUsers[1]);
-    //vstUser.AddChild(nil,FUsers[2]);
+    vstUser.AddChild(nil,FUsers[0]);
+    vstUser.AddChild(nil,FUsers[1]);
+    vstUser.AddChild(nil,FUsers[2]);
     vstUser.Selected[vstUser.GetFirst()] := True;
 
     for i := 0 to FRoles.Count-1 do
