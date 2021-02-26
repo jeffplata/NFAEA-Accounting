@@ -25,11 +25,14 @@ object fmMain: TfmMain
       object MenuItem4: TMenuItem
         Action = actLogout
       end
-      object Setdatabase1: TMenuItem
-        Action = actSetdatabase
+      object MenuItem6: TMenuItem
+        Action = actChangePass
       end
       object MenuItem5: TMenuItem
         Action = actUserManager
+      end
+      object Setdatabase1: TMenuItem
+        Action = actSetdatabase
       end
       object MenuItem11: TMenuItem
         Caption = '-'
@@ -67,6 +70,10 @@ object fmMain: TfmMain
     object actUserManager: TAction
       Caption = 'Manage &users...'
       OnExecute = actUserManagerExecute
+    end
+    object actChangePass: TAction
+      Caption = 'Change password...'
+      OnExecute = actChangePassExecute
     end
   end
 end

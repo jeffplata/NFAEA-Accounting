@@ -133,6 +133,7 @@ begin
     current_lo := 0;
   end;
 
+  //todo: improve this code
   if current_hi > 0 then
   begin
     Result := current_hi * MAX_LO + current_lo;

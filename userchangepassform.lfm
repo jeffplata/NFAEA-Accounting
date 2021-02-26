@@ -1,0 +1,94 @@
+object frmUserChangePass: TfrmUserChangePass
+  Left = 348
+  Height = 247
+  Top = 260
+  Width = 312
+  Caption = 'User Change Password'
+  ClientHeight = 247
+  ClientWidth = 312
+  OnCreate = FormCreate
+  Position = poOwnerFormCenter
+  LCLVersion = '2.0.10.0'
+  object edtCurrentPass: TLabeledEdit
+    Left = 24
+    Height = 23
+    Top = 48
+    Width = 266
+    Anchors = [akTop, akLeft, akRight]
+    EchoMode = emPassword
+    EditLabel.Height = 15
+    EditLabel.Width = 266
+    EditLabel.Caption = 'Current password:'
+    EditLabel.ParentColor = False
+    PasswordChar = '*'
+    TabOrder = 0
+  end
+  object edtNewPass: TLabeledEdit
+    Left = 24
+    Height = 23
+    Top = 96
+    Width = 266
+    Anchors = [akTop, akLeft, akRight]
+    EchoMode = emPassword
+    EditLabel.Height = 15
+    EditLabel.Width = 266
+    EditLabel.Caption = 'New password:'
+    EditLabel.ParentColor = False
+    PasswordChar = '*'
+    TabOrder = 1
+  end
+  object btnOk: TButton
+    Left = 135
+    Height = 25
+    Top = 209
+    Width = 75
+    Action = actOk
+    Anchors = [akRight, akBottom]
+    Default = True
+    TabOrder = 3
+  end
+  object btnCancel: TButton
+    Left = 215
+    Height = 25
+    Top = 209
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 4
+  end
+  object edtConfirmPass: TLabeledEdit
+    Left = 24
+    Height = 23
+    Top = 144
+    Width = 266
+    Anchors = [akTop, akLeft, akRight]
+    EchoMode = emPassword
+    EditLabel.Height = 15
+    EditLabel.Width = 266
+    EditLabel.Caption = 'Confirm new password:'
+    EditLabel.ParentColor = False
+    PasswordChar = '*'
+    TabOrder = 2
+  end
+  object lblMessage: TLabel
+    Left = 24
+    Height = 15
+    Top = 187
+    Width = 59
+    Caption = 'lblMessage'
+    Font.Color = clRed
+    Font.Style = [fsItalic]
+    ParentColor = False
+    ParentFont = False
+  end
+  object ActionList1: TActionList
+    Left = 264
+    Top = 8
+    object actOk: TAction
+      Caption = 'Ok'
+      OnExecute = actOkExecute
+    end
+  end
+end

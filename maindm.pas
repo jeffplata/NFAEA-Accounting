@@ -50,6 +50,7 @@ begin
   writeln;
   FConnection:= TAppConnection.Create(self);
   FHiLoGenerator:= THiloGenerator.Create;
+  FUserManager:= TUserManager.Create(self);
   FUser := TAppUser.Create;
   if GetisConnected then
     FUser.Login();
@@ -59,6 +60,7 @@ procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
   FHiLoGenerator.Free;
   FUser.Free;
+  FUserManager.Free;
   FConnection.Free;
 end;
 

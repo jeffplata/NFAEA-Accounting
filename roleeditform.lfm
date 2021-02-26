@@ -1,0 +1,64 @@
+object frmRole: TfrmRole
+  Left = 463
+  Height = 166
+  Top = 238
+  Width = 375
+  Caption = 'Edit role'
+  ClientHeight = 166
+  ClientWidth = 375
+  Position = poMainFormCenter
+  LCLVersion = '2.0.10.0'
+  object edtRolename: TLabeledEdit
+    Left = 16
+    Height = 23
+    Top = 32
+    Width = 342
+    Anchors = [akTop, akLeft, akRight]
+    EditLabel.Height = 15
+    EditLabel.Width = 342
+    EditLabel.Caption = 'Role name:'
+    EditLabel.ParentColor = False
+    TabOrder = 0
+  end
+  object edtLabel: TLabeledEdit
+    Left = 16
+    Height = 23
+    Top = 80
+    Width = 342
+    Anchors = [akTop, akLeft, akRight]
+    EditLabel.Height = 15
+    EditLabel.Width = 342
+    EditLabel.Caption = 'Label:'
+    EditLabel.ParentColor = False
+    TabOrder = 1
+  end
+  object btnOk: TButton
+    Left = 203
+    Height = 25
+    Top = 125
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'Ok'
+    Default = True
+    ModalResult = 1
+    TabOrder = 2
+  end
+  object btnCancel: TButton
+    Left = 283
+    Height = 25
+    Top = 125
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 3
+  end
+  object ActionList1: TActionList
+    Left = 18
+    Top = 112
+    object actOk: TAction
+      Caption = 'Ok'
+    end
+  end
+end

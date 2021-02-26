@@ -72,8 +72,9 @@ object frmUserManager: TfrmUserManager
       object cmbRoles: TComboBox
         Left = 272
         Height = 23
-        Top = 118
+        Top = 121
         Width = 178
+        Anchors = [akLeft, akBottom]
         ItemHeight = 15
         Style = csDropDownList
         TabOrder = 3
@@ -84,6 +85,7 @@ object frmUserManager: TfrmUserManager
         Top = 150
         Width = 80
         Action = actAssignRole
+        Anchors = [akLeft, akBottom]
         TabOrder = 4
       end
       object Button2: TButton
@@ -92,58 +94,93 @@ object frmUserManager: TfrmUserManager
         Top = 150
         Width = 80
         Action = actRemoveRole
+        Anchors = [akLeft, akBottom]
         TabOrder = 5
       end
-      object vstUser: TVirtualStringTree
+      object dbgUsers: TDBGrid
         Left = 8
         Height = 136
         Top = 8
         Width = 256
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        DefaultText = 'Node'
-        Header.AutoSizeIndex = 0
-        Header.Columns = <>
-        Header.MainColumn = -1
+        Color = clWindow
+        Columns = <        
+          item
+            Title.Caption = 'user_name'
+            Width = 72
+            FieldName = 'user_name'
+          end>
+        DataSource = dsUsers
+        FixedCols = 0
+        Options = [dgEditing, dgColumnResize, dgColumnMove, dgTabs, dgConfirmDelete, dgCancelOnExit, dgAutoSizeColumns, dgRowHighlight]
+        ReadOnly = True
+        Scrollbars = ssAutoBoth
         TabOrder = 6
-        TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toShowTreeLines, toThemeAware, toUseBlendedImages]
-        OnChange = vstUserChange
-        OnGetText = vstUserGetText
       end
-      object vstAssignedRoles: TVirtualStringTree
+      object dbgAssignedRoles: TDBGrid
         Left = 272
-        Height = 80
-        Top = 29
+        Height = 86
+        Top = 28
         Width = 178
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        DefaultText = 'Node'
-        Header.AutoSizeIndex = 0
-        Header.Columns = <>
-        Header.MainColumn = -1
+        Color = clWindow
+        Columns = <        
+          item
+            Title.Caption = 'ROLE_NAME'
+            Width = 82
+            FieldName = 'ROLE_NAME'
+          end>
+        DataSource = dsUsers
+        FixedCols = 0
+        Options = [dgEditing, dgColumnResize, dgColumnMove, dgTabs, dgConfirmDelete, dgCancelOnExit, dgAutoSizeColumns, dgRowHighlight]
+        ReadOnly = True
+        Scrollbars = ssAutoBoth
         TabOrder = 7
-        OnGetText = vstAssignedRolesGetText
       end
     end
     object tabRoles: TTabSheet
       Caption = 'Roles'
       ClientHeight = 212
       ClientWidth = 456
-      object lvRoles: TListView
+      object btnAddRole: TButton
         Left = 8
-        Height = 136
+        Height = 25
+        Top = 184
+        Width = 75
+        Action = actAddRole
+        Anchors = [akLeft, akBottom]
+        TabOrder = 0
+      end
+      object btnDeleteRole: TButton
+        Left = 88
+        Height = 25
+        Top = 184
+        Width = 75
+        Action = actDeleteRole
+        Anchors = [akLeft, akBottom]
+        TabOrder = 1
+      end
+      object dbgRoles: TDBGrid
+        Left = 8
+        Height = 168
         Top = 8
-        Width = 256
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        AutoWidthLastColumn = True
+        Width = 440
+        Color = clWindow
         Columns = <        
           item
-            Width = 252
+            Title.Caption = 'ROLE_NAME'
+            Width = 82
+            FieldName = 'ROLE_NAME'
+          end        
+          item
+            Title.Caption = 'ID'
+            Width = 26
+            FieldName = 'ID'
           end>
-        HideSelection = False
-        OwnerData = True
-        ShowColumnHeaders = False
-        TabOrder = 0
-        ViewStyle = vsReport
-        OnData = lvRolesData
+        DataSource = dsUsers
+        FixedCols = 0
+        Options = [dgColumnResize, dgColumnMove, dgTabs, dgConfirmDelete, dgCancelOnExit, dgAutoSizeColumns, dgRowHighlight]
+        ReadOnly = True
+        Scrollbars = ssAutoBoth
+        TabOrder = 2
       end
     end
   end
@@ -158,7 +195,6 @@ object frmUserManager: TfrmUserManager
     object actDeleteUser: TAction
       Caption = 'Delete user'
       OnExecute = actDeleteUserExecute
-      OnUpdate = actDeleteUserUpdate
     end
     object actAssignRole: TAction
       Caption = 'Assign role'
@@ -168,5 +204,25 @@ object frmUserManager: TfrmUserManager
       Caption = 'Remove role'
       OnExecute = actRemoveRoleExecute
     end
+    object actAddRole: TAction
+      Caption = 'Add role'
+      OnExecute = actAddRoleExecute
+    end
+    object actDeleteRole: TAction
+      Caption = 'Delete role'
+      OnExecute = actDeleteRoleExecute
+    end
+  end
+  object dsUsers: TDataSource
+    Left = 104
+    Top = 112
+  end
+  object dsAssignedRoles: TDataSource
+    Left = 160
+    Top = 112
+  end
+  object dsRoles: TDataSource
+    Left = 232
+    Top = 112
   end
 end

@@ -9,14 +9,13 @@ uses
 
 type
 
-  TConnectCallback = function(u, p: string; var msg: string): Boolean of object;
+  TConnectCallback = function(u, p: string; var msg: string): Boolean of object;  
 
   { TAppUser }
 
   TAppUser = class(TObject)
 
   private
-    //FAppConnection: TAppConnection;
     FConfigfile: string;
     FLoggedin: Boolean;
     FPass: string;
@@ -27,6 +26,7 @@ type
     function SetupTables(var msg: string): Boolean; 
     function Login_Internal: Boolean;  
     function login_(u, p, r: string; var msg: string): Boolean;
+    function changepass_(u, p: string; var msg: string): Boolean;
   public
     constructor Create;
     //property AppConnection: TAppConnection read FAppConnection write FAppConnection;
@@ -39,6 +39,7 @@ type
     function LoginDialog: Boolean;
     function LoginFiles(var msg: string): Boolean;
     function Logout(const eraseFromFile: Boolean=False): Boolean;
+    function ChangePassDialog: Boolean;
     function AddUser( AUser, APass: string ): Boolean;
     function AddRole( ARole_name, ALabel: string ): Boolean; 
     function AddUserRoles( AUser, ARole: string ): Boolean;
@@ -49,8 +50,8 @@ type
 
 implementation
 
-uses SQLDB, UserLoginForm, myUtils, hilogeneratorU, md5, IniFiles, Forms,
-  Controls, Dialogs;
+uses SQLDB, UserLoginForm, myUtils, hilogeneratorU, UserChangePassForm, md5,
+  IniFiles, Forms, Controls, Dialogs;
 
 
 { TAppUser }
@@ -112,6 +113,7 @@ begin
        '   ID Integer NOT NULL,'   +
        '   USER_NAME Varchar(80),' +
        '   PASS Varchar(255),'     +
+       '   IS_SYSTEM Integer,'     +
        '   CONSTRAINT PK_USERS PRIMARY KEY (ID)' +
        ' );';
 
@@ -124,7 +126,8 @@ begin
        ' ('                        +
        '   ID Integer NOT NULL,'   +
        '   ROLE_NAME Varchar(80),' +
-       '   LABEL Varchar(80),'     +
+       '   LABEL Varchar(80),'     +    
+       '   IS_SYSTEM Integer,'     +
        '   CONSTRAINT PK_ROLE PRIMARY KEY (ID)' +
        ' );';
 
@@ -139,7 +142,8 @@ begin
        ' ('                        +
        '   ID Integer NOT NULL,'   +  
        '   USER_NAME Varchar(80),' +
-       '   ROLE_NAME Varchar(80),' +
+       '   ROLE_NAME Varchar(80),' +     
+       '   IS_SYSTEM Integer,'     +
        '   CONSTRAINT PK_USER_ROLES PRIMARY KEY (ID)' +
        ' );';
             
@@ -162,7 +166,6 @@ var
 begin
   inherited Create;
 
-  //AppConnection:= AAppConnection; 
   if AppConnection = nil then
     MessageDlg('AppUser: No database connection.',mtError,[mbOk],0);
   if HiLoGenerator = nil then
@@ -280,13 +283,45 @@ begin
     end;
 end;
 
+function TAppUser.ChangePassDialog: Boolean;
+var
+  msg: string;
+begin
+  Result := True;
+  msg := '';
+  Application.CreateForm(TfrmUserChangePass, frmUserChangePass);
+  with frmUserChangePass do
+  try
+    ChangePassCallback:= @changepass_;
+    User:= FUsername;
+    CurrentPass := FPass;
+    if ShowModal = mrOk then
+      if (ChangePassCallback = nil) then
+        Result := changepass_(FUsername,edtNewPass.Text,msg);
+
+  finally
+    Free;
+  end;
+
+  if Result then
+  begin
+    if (FRememberme='1') then
+      with TIniFile.Create(FConfigfile) do
+      try
+        WriteString('user','p',BRK+EncryptString(Self.Pass)+BRK);
+      finally
+        Free;
+      end;
+  end;
+end;
+
 function TAppUser.AddUser(AUser, APass: string): Boolean;
 begin
   Result := false;
   with TSQLQuery.Create(nil) do
   try
     DataBase := AppConnection.Connection;
-    sql.add('insert into USERS(id, user_name, pass) values(:id, :u, :p);');
+    sql.add('insert into USERS(id, user_name, pass, is_system) values(:id, :u, :p, 1);');
     ParamByName('id').AsInteger:= HiLoGenerator.NextValue;
     ParamByName('u').Asstring := AUser;
     ParamByName('p').Asstring := MD5Print(MD5String(APass));
@@ -313,7 +348,7 @@ begin
   with TSQLQuery.Create(nil) do
   try
     DataBase := AppConnection.Connection;
-    sql.add('insert into ROLES(id, role_name, label) values(:id, :n, :l);');
+    sql.add('insert into ROLES(id, role_name, label, is_system) values(:id, :n, :l, 1);');
     ParamByName('id').AsInteger:= HiLoGenerator.NextValue;
     ParamByName('n').Asstring := ARole_name;
     ParamByName('l').Asstring := ALabel;
@@ -340,7 +375,7 @@ begin
   with TSQLQuery.Create(nil) do
   try
     DataBase := AppConnection.Connection;
-    sql.add('insert into USER_ROLES(id, user_name, role_name) values(:id, :u, :r);');
+    sql.add('insert into USER_ROLES(id, user_name, role_name, is_system) values(:id, :u, :r, 1);');
     ParamByName('id').AsInteger:= HiLoGenerator.NextValue;
     ParamByName('u').Asstring := AUser;
     ParamByName('r').Asstring := ARole;
@@ -374,8 +409,9 @@ begin
       Database := AppConnection.Connection;
       sql.Add('select user_name, pass from users');
       sql.add(' where (user_name=:u) and (pass=:p)');
-      ParamByName('u').AsString:= u;
-      ParamByName('p').AsString:= MD5Print(MD5String(p));
+      ParamByName('u').AsString:= u;  
+      p := MD5Print(MD5String(p));
+      ParamByName('p').AsString:= p;
       Prepare;
       Open;
       if not eof then
@@ -393,6 +429,35 @@ begin
     on e:exception do
     begin
       msg := e.Message;
+    end;
+  end;
+end;
+
+function TAppUser.changepass_(u, p: string; var msg: string): Boolean;
+begin
+  Result := true;
+  msg := '';
+  try
+    with TSQLQuery.Create(nil) do
+    try
+      Database := AppConnection.Connection;
+      sql.Add('update users set pass=:p');
+      sql.add(' where user_name=:u;');
+      ParamByName('u').AsString:= u;
+      ParamByName('p').AsString:= MD5Print(MD5String(p));
+      ExecSQL;
+      SQLConnection.Transaction.CommitRetaining;
+
+      FPass:= p;
+
+    finally
+      Free;
+    end;
+  except   
+    on e:exception do
+    begin
+      msg := e.Message;
+      Result := False;
     end;
   end;
 end;

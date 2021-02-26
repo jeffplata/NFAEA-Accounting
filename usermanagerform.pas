@@ -6,16 +6,14 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  StdCtrls, ActnList, user_BOM, VirtualTrees;
+  StdCtrls, ActnList, DBGrids, user_BOM, SQLDB, DB, VirtualTrees, Grids;
 
-type
+type       
+  TArrayOfDatasets = array of TSQLQuery;
 
   PUserTreeData = ^TUser;
   PAssignedRoleTreeData = ^TAssignedRole;
-
-  //TUserTreeData = record
-  //  User: TUser;
-  //end;
+  PRoleTreeData = ^TRole;
 
   { TfrmUserManager }
 
@@ -23,57 +21,57 @@ type
     actAddUser: TAction;
     actDeleteUser: TAction;
     actAssignRole: TAction;
+    actAddRole: TAction;
+    actDeleteRole: TAction;
     actRemoveRole: TAction;
     ActionList1: TActionList;
+    btnAddRole: TButton;
     btnClose: TButton;
     btnAddUser: TButton;
     btnRemoveUser: TButton;
+    btnDeleteRole: TButton;
     Button1: TButton;
     Button2: TButton;
     cmbRoles: TComboBox;
+    dsRoles: TDataSource;
+    dsAssignedRoles: TDataSource;
+    dsUsers: TDataSource;
+    dbgUsers: TDBGrid;
+    dbgAssignedRoles: TDBGrid;
+    dbgRoles: TDBGrid;
     edtUser: TEdit;
     Label1: TLabel;
-    lvRoles: TListView;
     PageControl1: TPageControl;
     tabUsers: TTabSheet;
     tabRoles: TTabSheet;
-    vstAssignedRoles: TVirtualStringTree;
-    vstUser: TVirtualStringTree;
+    procedure actAddRoleExecute(Sender: TObject);
     procedure actAddUserExecute(Sender: TObject);
     procedure actAddUserUpdate(Sender: TObject);
     procedure actAssignRoleExecute(Sender: TObject);
+    procedure actDeleteRoleExecute(Sender: TObject);
     procedure actDeleteUserExecute(Sender: TObject);
-    procedure actDeleteUserUpdate(Sender: TObject);
     procedure actRemoveRoleExecute(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure lvRolesData(Sender: TObject; Item: TListItem);
     procedure PageControl1Change(Sender: TObject);
-    procedure vstAssignedRolesGetText(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: String);
-    procedure vstUserChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
-    procedure vstUserGetText(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: String);
   private
     FRoles: TRoles;
     FUsers: TUsers;
-    function GetSelectedUser: TUser;
-    procedure UpdateAssignedRolesView();
+    FqUsers: TSQLQuery;
+    FqRoles: TSQLQuery;
+    FqAssignedRoles: TSQLQuery;
   private
-    property SelectedUser: TUser read GetSelectedUser;
-    //property SelectedUser: TUser read FSelectedUser write FSelectedUser;
+    function GetNextSelectableNode(vt: TVirtualStringTree): PVirtualNode;
   public
-    class procedure Open(AUsers: TUsers; ARoles: TRoles);
-
+    class procedure Open(AUsers: TUsers; ARoles: TRoles; qUsers, qRoles: TSQLQuery; q: TArrayOfDatasets);
   end;
 
-//var
-//  frmUserManager: TfrmUserManager;
 
 implementation
+
+uses RoleEditForm, hilogeneratorU, Variants, md5;  
+
 
 {$R *.lfm}
 
@@ -94,86 +92,67 @@ begin
   PageControl1.ActivePage := tabUsers;
 end;
 
-procedure TfrmUserManager.lvRolesData(Sender: TObject; Item: TListItem);
-var
-  r: TRole;
-begin
-  r := TRole(FRoles[Item.Index]);
-  Item.Caption := r.Rolename;
-end;
-
 procedure TfrmUserManager.PageControl1Change(Sender: TObject);
 begin
   if PageControl1.ActivePage = tabUsers then
     edtUser.SetFocus;
 end;
 
-procedure TfrmUserManager.vstAssignedRolesGetText(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: String);
-var
-  Data: PAssignedRoleTreeData;
-begin
-  Data := (sender as TBaseVirtualTree).GetNodeData(Node);
-  CellText := Data^.Rolename;
-end;
 
-procedure TfrmUserManager.vstUserChange(Sender: TBaseVirtualTree;
-  Node: PVirtualNode);
-begin
-  UpdateAssignedRolesView();
-end;
 
-procedure TfrmUserManager.vstUserGetText(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: String);
+function TfrmUserManager.GetNextSelectableNode(vt: TVirtualStringTree
+  ): PVirtualNode;
 var
-  Data: PUserTreeData;
+  currentNode: PVirtualNode;
 begin
-  Data := (sender as TBaseVirtualTree).GetNodeData(Node);
-  CellText := Data^.Username;
-end;
-
-function TfrmUserManager.GetSelectedUser: TUser;
-var
-  node: PVirtualNode;
-  ind: Cardinal;
-begin
-  result := nil;
-  node := vstUser.GetFirstSelected();
-  if not assigned(node) then exit;
-  ind := vstUser.AbsoluteIndex(node);
-  result := FUsers[ind];
-end;
-
-procedure TfrmUserManager.UpdateAssignedRolesView();
-var
-  i: Integer;
-begin
-  vstAssignedRoles.Clear;
-  //todo: check error here
-  for i := 0 to SelectedUser.Roles.Count-1 do
-    vstAssignedRoles.AddChild(nil,SelectedUser.Roles[i]);
+  currentNode := vt.GetFirstSelected;
+  if not assigned(currentNode) then exit;
+  Result := currentNode^.NextSibling;
+  if not assigned(Result) then
+    Result := currentNode^.PrevSibling;
 end;
 
 procedure TfrmUserManager.actAddUserExecute(Sender: TObject);
 var
-  u: TUser;
   s: string;
-  node: PVirtualNode;
 begin
   s := edtUser.Text;
-  if (s <> '') and (FUsers.IndexOf(s) = -1) then
-  begin
-    u := TUser.Create;
-    u.ID:= 999;
-    u.Username:= s;
-    FUsers.Add(u);
-    node := vstUser.AddChild(nil,Fusers[Fusers.Count-1]);
-    vstUser.Selected[node] := True;
+  if s = '' then exit;  //<== exit
 
-    edtUser.Text:= '';
-    edtUser.SetFocus;
+  FqUsers.Append;
+  FqUsers.FieldByName('user_name').AsString:= s;
+  FqUsers.FieldByName('pass').AsString:= MD5Print(MD5String('Password1'));
+  FqUsers.FieldByName('ID').AsInteger:= HiLoGenerator.NextValue;
+  FqUsers.Post;
+  FqUsers.ApplyUpdates;
+  FqUsers.SQLConnection.Transaction.CommitRetaining;
+                                                      
+  edtUser.Text:= '';
+  edtUser.SetFocus;
+
+end;
+
+procedure TfrmUserManager.actAddRoleExecute(Sender: TObject);
+var
+  rolename, rolelabel: string;
+begin
+  rolename := '';
+  rolelabel := '';
+  if TfrmRole.GetInput(rolename, rolelabel, true) then
+  begin
+    if rolename = '' then exit;
+    if rolelabel = '' then rolelabel := Uppercase(rolename[1])+copy(rolename,2,10000);
+
+    FqRoles.Append;
+    FqRoles.FieldByName('role_name').AsString:= rolename;
+    FqRoles.FieldByName('label').AsString:= rolelabel;
+    FqRoles.FieldByName('ID').AsInteger:= HiLoGenerator.NextValue;
+    FqRoles.Post;
+    FqRoles.ApplyUpdates;
+    FqRoles.SQLConnection.Transaction.CommitRetaining;
+
+    cmbRoles.AddItem(FqRoles.FieldByName('role_name').AsString,
+      TObject(FqRoles.FieldByName('ID').AsInteger));
   end;
 end;
 
@@ -183,93 +162,117 @@ begin
 end;
 
 procedure TfrmUserManager.actAssignRoleExecute(Sender: TObject);
-var
-  r: TAssignedRole;
-  duplicate: Boolean;
-  i: Integer;
 begin
-  duplicate := False;
-  for i := 0 to SelectedUser.Roles.Count-1 do
+  if cmbRoles.Text = '' then exit;  //<==
+  if FqUsers.eof then exit;         //<==
+
+  if not FqAssignedRoles.Locate('user_name;role_name', VarArrayOf([FqUsers.FieldByName('user_name').AsString,
+    cmbRoles.Text]), [loCaseInsensitive]) then
   begin
-    if TAssignedRole(SelectedUser.Roles[i]).Rolename = cmbRoles.Text then
-    begin
-      duplicate := True;
-      break;
-    end;
+    FqAssignedRoles.Append;
+    FqAssignedRoles.FieldByName('user_name').AsString:= FqUsers.FieldByName('user_name').AsString; 
+    FqAssignedRoles.FieldByName('role_name').AsString:= cmbRoles.Text; 
+    FqAssignedRoles.FieldByName('ID').AsInteger:= HiLoGenerator.NextValue;
+    FqAssignedRoles.Post;
+    FqAssignedRoles.ApplyUpdates;
+    FqAssignedRoles.SQLTransaction.CommitRetaining;
   end;
-  if not duplicate then
-  begin
-    r := TAssignedRole.Create;
-    r.RecordID:= 0;
-    r.RoleID:= Integer(cmbRoles.Items.Objects[cmbRoles.ItemIndex]);
-    r.Rolename:= cmbRoles.Text;
-    SelectedUser.Roles.Add(r);
-    //lvAssignedRoles.Items.Count := SelectedUser.Roles.Count;
+
+end;
+
+procedure TfrmUserManager.actDeleteRoleExecute(Sender: TObject);
+var
+  ind: Integer;
+begin
+  if FqRoles.eof then exit;
+  if FqRoles.FieldByName('IS_SYSTEM').AsInteger=1 then
+    MessageDlg('Action not allowed.',mtInformation,[mbOk],0)
+  else
+  begin          
+    ind := cmbRoles.Items.IndexOf(FqRoles.FieldByName('role_name').AsString);
+
+    FqRoles.Delete;
+    FqRoles.ApplyUpdates;
+    FqRoles.SQLConnection.Transaction.CommitRetaining;
+
+    if ind > -1 then
+      cmbRoles.Items.Delete(ind);
   end;
 end;
 
 procedure TfrmUserManager.actDeleteUserExecute(Sender: TObject);
-var
-  ind: Cardinal;
-  node, nextnode: PVirtualNode;
 begin
-  node := vstUser.GetFirstSelected;
-  if not assigned(node) then exit;
-  nextnode := node^.NextSibling;
-  if nextnode = nil then nextnode := node^.PrevSibling;
-  ind := vstUser.AbsoluteIndex(node);
-  FUsers.Delete(FUsers[ind]);
-  vstUser.DeleteNode(node);
-  vstUser.Selected[nextnode] := True;
-  edtUser.SetFocus;
-end;
-
-procedure TfrmUserManager.actDeleteUserUpdate(Sender: TObject);
-begin
-  (sender as taction).Enabled := Assigned(SelectedUser)
-    and (SelectedUser.Username <> '')
-    and (SelectedUser.Username <> 'admin')
-end;
-
-procedure TfrmUserManager.actRemoveRoleExecute(Sender: TObject);
-var
-  node, nextnode : PVirtualNode;
-  ind: Cardinal;
-begin
-  node := vstAssignedRoles.GetFirstSelected();
-  if not assigned(node) then exit;
-  ind := vstAssignedRoles.AbsoluteIndex(node);
-  nextnode := node^.NextSibling;
-  if nextnode = nil then nextnode := node^.PrevSibling;
-  ind := vstUser.AbsoluteIndex(node);
-
-  if (SelectedUser.Username='admin') and (PAssignedRoleTreeData(node)^.Rolename='admin') then
+  if FqUsers.eof then exit;    
+  if FqUsers.FieldByName('IS_SYSTEM').AsInteger=1 then
     MessageDlg('Action not allowed.',mtInformation,[mbOk],0)
   else
   begin
-    SelectedUser.Roles.Delete(ind);
-    vstAssignedRoles.DeleteNode(node);
-    vstAssignedRoles.Selected[nextnode] := True;
+    FqUsers.Delete;
+    FqUsers.ApplyUpdates;
+    FqUsers.SQLConnection.Transaction.CommitRetaining;
   end;
+
 end;
 
-class procedure TfrmUserManager.Open(AUsers: TUsers; ARoles: TRoles);
-var
-  i: Integer;
+procedure TfrmUserManager.actRemoveRoleExecute(Sender: TObject);
+begin
+  if FqAssignedRoles.eof then exit;   // <==
+  if FqAssignedRoles.FieldByName('is_system').AsInteger = 1 then
+    MessageDlg('Action not allowed.',mtInformation,[mbOk],0)
+  else
+  begin
+    FqAssignedRoles.Delete;
+    FqAssignedRoles.ApplyUpdates;
+    FqAssignedRoles.SQLTransaction.CommitRetaining;
+  end;
+
+end;
+
+class procedure TfrmUserManager.Open(AUsers: TUsers; ARoles: TRoles; qUsers,
+  qRoles: TSQLQuery; q: TArrayOfDatasets);
+{
+ Limit user management to the primary forms, specially the MainForm
+}
 begin
   with TfrmUserManager.Create(nil) do
   try
     FRoles := ARoles;
-    lvRoles.Items.Count := FRoles.Count;
     FUsers := AUsers;
-    //vstUser.RootNodeCount:= 3;
-    vstUser.AddChild(nil,FUsers[0]);
-    vstUser.AddChild(nil,FUsers[1]);
-    vstUser.AddChild(nil,FUsers[2]);
-    vstUser.Selected[vstUser.GetFirst()] := True;
 
-    for i := 0 to FRoles.Count-1 do
-      cmbRoles.AddItem(FRoles[i].Rolename,TObject(FRoles[i].ID));
+    FqUsers := qUsers;
+    fqusers.first;
+    FqRoles := qRoles;
+    FqAssignedRoles := q[0];
+
+    //set up grids    
+    FqUsers.First;
+    dsUsers.DataSet := FqUsers;
+    dbgUsers.DataSource := dsUsers;
+    //dbgUsers.AutoAdjustColumns;
+    dbgUsers.AutoFillColumns:=true;
+                                        
+    FqAssignedRoles.First;
+    dsAssignedRoles.DataSet := FqAssignedRoles;
+    dbgAssignedRoles.DataSource := dsAssignedRoles;
+    //dbgAssignedRoles.AutoAdjustColumns;
+    dbgAssignedRoles.AutoFillColumns:=true;
+
+    FqRoles.First;
+    dsRoles.DataSet := FqRoles;
+    dbgRoles.DataSource := dsRoles;
+    //dbgRoles.AutoAdjustColumns;
+    dbgRoles.AutoFillColumns:=true;
+
+    //FqRoles to combobox
+    with FqRoles do
+    begin
+      while not eof do
+      begin
+        cmbRoles.AddItem(FieldByName('role_name').AsString, TObject(FieldByName('ID').AsInteger));
+        Next;
+      end;
+      First;
+    end;
 
     ShowModal;
   finally

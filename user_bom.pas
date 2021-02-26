@@ -1,227 +1,112 @@
 unit user_BOM;
 
-{$mode objfpc}{$H+}
+{$mode delphi}{$H+}
 
 interface
 
 uses
-  Contnrs;
+  base_BOM;
 
 type
 
   { TRole }
 
-  TRole = class
+  TRole = class(TBaseBOM)
   private
-    FID: integer;
     FRoleLabel: string;
     FRolename: string;
   public
-    property ID: integer read FID write FID;
+    procedure Assign(src: TRole);
+  published
     property Rolename: string read FRolename write FRolename;
     property RoleLabel: string read FRoleLabel write FRoleLabel;
   end;
 
-  { TRoles }
+  { TAssignedRole }
 
-  TRoles = class
+  TAssignedRole = class(TBaseBOM)
   private
-    FItems: TObjectList;
-    function GetCount: integer;
-    function GetRole(Index: Integer): TRole;
-  public    
-    constructor Create(const AOwnItems: Boolean = True);
-    destructor Destroy; override;
-
-    function Add( ARole: TRole ): Integer; overload;
-    function Add: TRole; overload;
-    function Delete( ARole: TRole ): Boolean;
-    function IndexOf(ARolename: string): Integer;
-
-    property Count: integer read GetCount;
-    property Items[Index: Integer]: TRole read GetRole; default;
+    FRolename: string;
+    FUsername: string;
+  public
+    procedure Assign( src: TAssignedRole );
+  published
+    property Rolename: string read FRolename write FRolename;  
+    property Username: string read FUsername write FUsername;
   end;
+
+  TAssignedRoles = TBaseBOMList<TAssignedRole>;
 
   { TUser }
 
-  TUser = class
+  TUser = class(TBaseBOM)
   private
-    FID: integer;
-    FRoles: TObjectList;
+    FRoles: TAssignedRoles;
     FUsername: string;
   public
-    constructor Create;
+    constructor Create(AppendMode: Boolean=False);
     destructor Destroy; override;
-    property ID: integer read FID write FID;
+    procedure Assign( src: TUser );
+  published
     property Username: string read FUsername write FUsername;
-    property Roles: TObjectList read FRoles write FRoles;
+    property Roles: TAssignedRoles read FRoles write FRoles;
   end;
 
-  { TUsers }
-
-  TUsers = class
-  private
-    FItems: TObjectList;
-    function GetCount: integer;
-    function GetUser(Index: Integer): TUser;
-  public
-    constructor Create(const AOwnItems: Boolean = True);
-    destructor Destroy; override;
-
-    function Add( AUser: TUser ): Integer; overload;
-    function Add: TUser; overload;
-    function Delete( AUser: TUser ): Boolean;
-    function IndexOf(AUsername: string): Integer;
-
-    property Count: integer read GetCount;
-    property Items[Index: Integer]: TUser read GetUser; default;
-  end;
-
-  { TAssignedRole }
-
-  TAssignedRole = class
-  private
-    FRecordID: integer;
-    FRoleID: integer;
-    FRolename: string;
-  public
-    property RecordID: integer read FRecordID write FRecordID;
-    property RoleID: integer read FRoleID write FRoleID;
-    property Rolename: string read FRolename write FRolename;
-  end;
+  TRoles = TBaseBOMList<TRole>;
+  TUsers = TBaseBOMList<TUser>;
 
 implementation
 
+{ TRole }
+
+procedure TRole.Assign(src: TRole);
+begin
+  inherited Assign(src);
+  with src do
+  begin
+    self.Rolename:= src.Rolename;
+  end;
+end;
+
+{ TAssignedRole }
+
+procedure TAssignedRole.Assign(src: TAssignedRole);
+begin
+  inherited Assign(src);
+  with src do
+  begin
+    self.Username:= src.Username;
+    self.Rolename:= src.Rolename;
+  end;
+end;
+
 { TUser }
 
-constructor TUser.Create;
+constructor TUser.Create(AppendMode: Boolean);
 begin
-  inherited Create;
-  FRoles := TObjectList.Create(True);
+  inherited Create(AppendMode);
+  FRoles := TAssignedRoles.Create;
 end;
 
 destructor TUser.Destroy;
 begin
-  Froles.Free;
+  FRoles.Free;
   inherited Destroy;
 end;
 
-{ TRoles }
-
-function TRoles.GetCount: integer;
-begin
-  result := FItems.Count;
-end;
-
-function TRoles.GetRole(Index: Integer): TRole;
-begin
-  result := TRole(FItems[Index]);
-end;
-
-constructor TRoles.Create(const AOwnItems: Boolean);
-begin
-  FItems := TObjectList.Create(AOwnItems);
-end;
-
-destructor TRoles.Destroy;
-begin
-  FItems.Free;
-  inherited Destroy;
-end;
-
-function TRoles.Add(ARole: TRole): Integer;
-begin
-  result := FItems.Add(ARole);
-end;
-
-function TRoles.Add: TRole;
-begin
-  result := TRole.Create;
-  FItems.Add(result);
-end;
-
-function TRoles.Delete(ARole: TRole): Boolean;
-begin
-  result := FItems.Remove(ARole) > -1;
-end;
-
-function TRoles.IndexOf(ARolename: string): Integer;
+procedure TUser.Assign(src: TUser);
 var
-  i, ind: Integer;
-  found: boolean;
+  i: Integer;
 begin
-  found := false;
-  result := -1;
-  ind := -1;
-  for i := 0 to FItems.Count-1 do
+  inherited Assign(src);
+  with src do
   begin
-    Inc(ind);
-    if TRole(FItems[i]).Rolename=ARolename then
+    self.Username:= src.Username;
+    for i := 0 to src.Roles.Count-1 do
     begin
-      found:= true;
-      break;
+      self.Roles[i].Assign(src.Roles[i]);
     end;
   end;
-  if found then result := ind;
-end;
-
-{ TUsers }
-
-function TUsers.GetUser(Index: Integer): TUser;
-begin
-  Result := TUser(FItems[Index]);
-end;
-
-constructor TUsers.Create(const AOwnItems: Boolean);
-begin
-  FItems := TObjectList.Create(AOwnItems);
-end;
-
-destructor TUsers.Destroy;
-begin
-  FItems.Free;
-  inherited Destroy;
-end;
-
-function TUsers.Add(AUser: TUser): Integer;
-begin
-  result := FItems.Add(AUser);
-end;
-
-function TUsers.Add: TUser;
-begin
-  result := TUser.Create;
-  Add(result);
-end;
-
-function TUsers.Delete(AUser: TUser): Boolean;
-begin
-  result := FItems.Remove(AUser) > -1;
-end;
-
-function TUsers.IndexOf(AUsername: string): Integer;
-var
-  i, ind: Integer;
-  found: boolean;
-begin
-  found := false;
-  result := -1;
-  ind := -1;
-  for i := 0 to FItems.Count-1 do
-  begin
-    Inc(ind);
-    if TUser(FItems[i]).Username=AUsername then
-    begin
-      found:= true;
-      break;
-    end;
-  end;
-  if found then result := ind;
-end;
-
-function TUsers.GetCount: integer;
-begin
-  result := FItems.Count;
 end;
 
 end.

@@ -15,6 +15,7 @@ type
   TfmMain = class(TForm)
     actExit: TAction;
     actAbout: TAction;
+    actChangePass: TAction;
     actUserManager: TAction;
     actLogout: TAction;
     actSetdatabase: TAction;
@@ -24,11 +25,13 @@ type
     MenuItem2: TMenuItem;
     MenuItem4: TMenuItem;
     MenuItem5: TMenuItem;
+    MenuItem6: TMenuItem;
     Setdatabase1: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
     MenuItem3: TMenuItem;
     StatusBar1: TStatusBar;
+    procedure actChangePassExecute(Sender: TObject);
     procedure actExitExecute(Sender: TObject);
     procedure actLogoutExecute(Sender: TObject);
     procedure actLogoutUpdate(Sender: TObject);
@@ -57,6 +60,13 @@ uses
 procedure TfmMain.actExitExecute(Sender: TObject);
 begin
   close;
+end;
+
+procedure TfmMain.actChangePassExecute(Sender: TObject);
+begin
+  //action change password
+  if dmMain.User.Loggedin then
+    dmMain.User.ChangePassDialog;
 end;
 
 procedure TfmMain.actLogoutExecute(Sender: TObject);

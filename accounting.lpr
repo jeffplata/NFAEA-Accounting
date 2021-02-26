@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, mainForm, appConnectionU, mainDM, myUtils, changedatabaseform,
   pascalscript, appUserU, UserLoginForm, hilogeneratorU, UserManagerForm,
-  UserManagerU, user_BOM;
+  UserManagerU, user_BOM, RoleEditForm, base_BOM, UserChangePassForm;
 
 {$R *.res}
 
