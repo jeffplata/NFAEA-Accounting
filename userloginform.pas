@@ -35,6 +35,8 @@ var
 
 implementation
 
+uses md5;
+
 {$R *.lfm}
 
 { TfrmUserLogin }
@@ -54,7 +56,7 @@ begin
     btnOk.Enabled:= false;
     msg := '';
     u := edtUsername.text;
-    p := edtPassword.text;
+    p := MD5Print(MD5String(edtPassword.Text));
     r := '0';
     if chkRememberme.Checked then
       r := '1';

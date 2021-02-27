@@ -26,9 +26,9 @@ object frmUserManager: TfrmUserManager
     Height = 240
     Top = 8
     Width = 464
-    ActivePage = tabUsers
+    ActivePage = tabRoles
     Anchors = [akTop, akLeft, akRight, akBottom]
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 1
     OnChange = PageControl1Change
     object tabUsers: TTabSheet
@@ -173,7 +173,7 @@ object frmUserManager: TfrmUserManager
           item
             Title.Caption = 'ID'
             Width = 26
-            FieldName = 'ID'
+            FieldName = 'LABEL'
           end>
         DataSource = dsUsers
         FixedCols = 0

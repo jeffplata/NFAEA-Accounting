@@ -29,11 +29,13 @@ type
     function changepass_(u, p: string; var msg: string): Boolean;
   public
     constructor Create;
-    //property AppConnection: TAppConnection read FAppConnection write FAppConnection;
+    // always set username, password, rememberme and loggedin
+    //   after a successful login, especially on callbacks
     property Username: string read FUsername write FUsername;
     property Pass: string read FPass write FPass;
     property Rememberme: string read FRememberme write FRememberme;
     property Loggedin: Boolean read FLoggedin write FLoggedin;
+
     property TableReady: Boolean read FTableReady write FTableReady;
     function Login: Boolean;
     function LoginDialog: Boolean;
@@ -188,7 +190,7 @@ end;
 
 function TAppUser.LoginDialog: Boolean;
 var
-  msg: string;
+  msg, p: string;
   r: Char;
 
 begin
@@ -199,16 +201,18 @@ begin
   try
     LoginCallback:= @login_;
     if ShowModal = mrOk then
+    begin
+      p := MD5Print(MD5String(edtPassword.Text));
       if (LoginCallback <> nil) then
         Result := Self.Loggedin
       else
-        begin
-          r := '0';
-          if chkRememberme.Checked then
-            r := '1';
-          Result := login_(edtUsername.Text,edtPassword.Text,r,msg);
-        end;
-
+      begin
+        r := '0';
+        if chkRememberme.Checked then
+          r := '1';
+        Result := login_(edtUsername.Text,p,r,msg);
+      end;
+    end
   finally
     Free;
   end;
@@ -235,13 +239,13 @@ var
 begin
   Result := False;
   msg := '';
-
+                     
+  //connect using saved credentials
   if FileExists(FConfigfile) then
-    //connect using saved credentials
     Result := LoginFiles(msg);
-
+                              
+  //connect using login form
   if not Result then
-    //connect using login form
     Result := LoginDialog();
 
 end;
@@ -404,16 +408,17 @@ begin
   msg := 'Username or password is not valid.';
   try
     //try to login
+    // the password should already be in hashed format
     with TSQLQuery.Create(nil) do
     try
       Database := AppConnection.Connection;
       sql.Add('select user_name, pass from users');
       sql.add(' where (user_name=:u) and (pass=:p)');
       ParamByName('u').AsString:= u;  
-      p := MD5Print(MD5String(p));
       ParamByName('p').AsString:= p;
       Prepare;
       Open;
+      // always set this properties after a successful login
       if not eof then
       begin
         FUsername:= u;

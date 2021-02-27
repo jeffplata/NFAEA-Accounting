@@ -40,7 +40,7 @@ type
     procedure FormActivate(Sender: TObject);
   private
     procedure UpdateConnectedIndicator;
-
+    procedure UpdateFormUI;
   public
 
   end;
@@ -74,7 +74,10 @@ begin
   dmMain.User.Logout(True);
   UpdateConnectedIndicator;
   if dmMain.User.LoginDialog then
-    UpdateConnectedIndicator
+  begin
+    UpdateConnectedIndicator;
+    UpdateFormUI;
+  end
   else
     actExit.Execute;
 end;
@@ -88,6 +91,7 @@ procedure TfmMain.actSetdatabaseExecute(Sender: TObject);
 begin
   dmMain.SetDatabase;
   UpdateConnectedIndicator;
+  UpdateFormUI;
 end;
 
 procedure TfmMain.actUserManagerExecute(Sender: TObject);
@@ -98,6 +102,7 @@ end;
 procedure TfmMain.FormActivate(Sender: TObject);
 begin
   UpdateConnectedIndicator;
+  UpdateFormUI;
 end;
 
 procedure TfmMain.UpdateConnectedIndicator;
@@ -115,6 +120,12 @@ begin
     st_text := st_text + ' | Not logged in';
 
   StatusBar1.SimpleText := st_text;
+end;
+
+procedure TfmMain.UpdateFormUI;
+begin
+  // set action/memu visibility/accessibility here
+  actUserManager.Visible:= dmMain.User.Username = 'admin';
 end;
 
 end.

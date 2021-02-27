@@ -131,6 +131,7 @@
         <Filename Value="userchangepassform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmUserChangePass"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UserChangePassForm"/>
       </Unit14>
